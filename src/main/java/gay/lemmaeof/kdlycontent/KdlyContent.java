@@ -212,7 +212,7 @@ public class KdlyContent implements ModInitializer {
 		MATERIALS.put("cake", Material.CAKE);
 		MATERIALS.put("amethyst", Material.AMETHYST);
 		MATERIALS.put("powder_snow", Material.POWDER_SNOW);
-		MATERIALS.put("frog_spawn", Material.FROG_SPAWN);
-		MATERIALS.put("froglight", Material.FROGLIGHT);
+//		MATERIALS.put("frog_spawn", Material.FROG_SPAWN);
+//		MATERIALS.put("froglight", Material.FROGLIGHT);
 	}
 }
