@@ -1,25 +1,25 @@
 {
 	"schema_version": 1,
 	"quilt_loader": {
-		"group": "com.example",
-		"id": "example_mod",
+		"group": "gay.lemmaeof",
+		"id": "kdlycontent",
 		"version": "${version}",
 		"metadata": {
-			"name": "Mod Name",
-			"description": "A short description of your mod.",
+			"name": "Kdly Content",
+			"description": "A system for writing simple blocks and items in kdl",
 			"contributors": {
-				"Me!": "Owner"
+				"LemmaEOF": "Owner"
 			},
 			"contact": {
-				"homepage": "https://example.com/",
-				"issues": "https://github.com/QuiltMC/quilt-template-mod/issues",
-				"sources": "https://github.com/QuiltMC/quilt-template-mod"
+				"homepage": "https://lemmaeof.gay/",
+				"issues": "https://github.com/LemmaEOF/KdlyContent/issues",
+				"sources": "https://github.com/LemmaEOF/KdlyContent"
 			},
-			"icon": "assets/example_mod/icon.png"
+			"icon": "assets/kdlycontent/icon.png"
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
-			"init": "com.example.example_mod.ExampleMod"
+			"init": "gay.lemmaeof.kdlycontent.KdlyContent"
 		},
 		"depends": [
 			{
@@ -32,9 +32,12 @@
 			},
 			{
 				"id": "minecraft",
-				"versions": ">=1.19"
+				"versions": ">=1.18.2"
+			},
+			{
+				"id": "staticdata",
+				"versions": "*"
 			}
 		]
-	},
-	"mixin": "example_mod.mixins.json"
+	}
 }

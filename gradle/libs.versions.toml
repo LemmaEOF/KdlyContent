@@ -6,6 +6,10 @@ quilt_loader = "0.17.0"
 
 quilted_fabric_api = "2.0.0-alpha.2+0.55.3-1.19"
 
+kdl = "0.1.0"
+
+static_data = "1.1.2"
+
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 quilt_mappings = { module = "org.quiltmc:quilt-mappings", version.ref = "quilt_mappings" }
@@ -13,6 +17,10 @@ quilt_loader = { module = "org.quiltmc:quilt-loader", version.ref = "quilt_loade
 
 quilted_fabric_api = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api", version.ref = "quilted_fabric_api" }
 quilted_fabric_api_deprecated = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api-deprecated", version.ref = "quilted_fabric_api" }
+
+kdl = { module = "dev.hbeck.kdl:kdl4j", version.ref = "kdl" }
+
+static_data = { module = "io.github.cottonmc:StaticData", version.ref = "static_data" }
 
 # If you have multiple similar dependencies, you can declare a dependency bundle and reference it on the build script with "libs.bundles.example".
 [bundles]
