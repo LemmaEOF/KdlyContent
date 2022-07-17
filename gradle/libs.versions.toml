@@ -6,7 +6,7 @@ quilt_loader = "0.17.0"
 
 quilted_fabric_api = "2.0.0-alpha.2+0.55.3-1.19"
 
-kdl = "0.1.0"
+kdl = "0.2.0"
 
 static_data = "1.1.2"
 
