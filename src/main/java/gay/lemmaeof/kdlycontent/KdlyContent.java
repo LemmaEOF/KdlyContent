@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.Material;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.*;
@@ -21,6 +22,7 @@ import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings;
 import org.quiltmc.qsl.item.group.api.QuiltItemGroup;
+import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +116,7 @@ public class KdlyContent implements ModInitializer {
 	}
 
 	private static void parseItem(Identifier id, KDLNode parent) {
-		Item.Settings settings = new Item.Settings();
+		QuiltItemSettings settings = new QuiltItemSettings();
 		ItemGroup group = GROUP;
 		for (KDLNode node : parent.getChild().orElse(new KDLDocument.Builder().build()).getNodes()) {
 			switch (node.getIdentifier()) {
@@ -148,6 +150,16 @@ public class KdlyContent implements ModInitializer {
 				}
 				case "food" ->
 						settings.food(getFoodComponent(id, node.getChild().orElse(new KDLDocument(new ArrayList<>())).getNodes()));
+				case "equipmentSlot" -> {
+					String slot = node.getArgs().get(0).getAsString().getValue();
+					settings.equipmentSlot(switch(slot) {
+						case "head" -> EquipmentSlot.HEAD;
+						case "chest" -> EquipmentSlot.CHEST;
+						case "legs" -> EquipmentSlot.LEGS;
+						case "feet" -> EquipmentSlot.FEET;
+						default -> throw new ParseException(id, "Unknown equipment slot " + slot);
+					});
+				}
 				default -> LOGGER.info("Unknown node type {} in kdl for item {}", node.getIdentifier(), id);
 			}
 		}
