@@ -35,10 +35,8 @@ dependencies {
 	modImplementation libs.quilted.fabric.api
 
 	implementation libs.kdl
-	modImplementation libs.static.data
 
 	include libs.kdl
-	include libs.static.data
 }
 
 processResources {
