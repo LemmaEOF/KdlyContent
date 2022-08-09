@@ -38,23 +38,22 @@ public class KdlyContent implements ModInitializer {
 		QuiltLoader.getEntrypoints("kdlycontent", Runnable.class).forEach(Runnable::run);
 		ImmutableSet<ContentItem> data = ContentLoading.getAll("kdlycontent.kdl");
 		for (ContentItem item : data) {
-			if (item.getIdentifier().getPath().endsWith(".kdl")) {
-				String namespace = item.getIdentifier().getNamespace();
-				try {
-					KDLDocument kdl = parser.parse(item.createInputStream());
-					for (KDLNode node : kdl.getNodes()) {
-						String name = node.getArgs().get(0).getAsString().getValue();
-						Identifier id = new Identifier(namespace, name);
-						String type = toSnakeCase(node.getIdentifier());
-						if (!type.contains(":")) type = "kdlycontent:" + type;
-						Identifier typeId = new Identifier(type);
-						if (KdlyRegistries.CONTENT_TYPES.containsId(typeId)) KdlyRegistries.CONTENT_TYPES.get(typeId).generateFrom(id, node);
-						else throw new ParseException(id, "Content type `" + node.getIdentifier() + "` not found (converted to `" + typeId + "`)");
-					}
-				} catch (IOException | ParseException e) {
-					throw new RuntimeException("Could not load KDL for file " + item.getIdentifier(), e);
+			String namespace = item.getIdentifier().getNamespace();
+			try {
+				KDLDocument kdl = parser.parse(item.createInputStream());
+				for (KDLNode node : kdl.getNodes()) {
+					String name = node.getArgs().get(0).getAsString().getValue();
+					Identifier id = new Identifier(namespace, name);
+					String type = toSnakeCase(node.getIdentifier());
+					if (!type.contains(":")) type = "kdlycontent:" + type;
+					Identifier typeId = new Identifier(type);
+					if (KdlyRegistries.CONTENT_TYPES.containsId(typeId)) KdlyRegistries.CONTENT_TYPES.get(typeId).generateFrom(id, node);
+					else throw new ParseException(id, "Content type `" + node.getIdentifier() + "` not found (converted to `" + typeId + "`)");
 				}
+			} catch (IOException | ParseException e) {
+				throw new RuntimeException("Could not load KDL for file " + item.getIdentifier(), e);
 			}
+
 		}
 		StringBuilder builder = new StringBuilder("Registered ");
 		List<String> messages = new ArrayList<>();

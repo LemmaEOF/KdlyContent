@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 public interface ContentType {
 	static ContentType of(BiConsumer<Identifier, KDLNode> generateFrom, Supplier<Optional<String>> getApplyMessage) {
 		return new ContentType() {
-
 			@Override
 			public void generateFrom(Identifier id, KDLNode parent) {
 				generateFrom.accept(id, parent);

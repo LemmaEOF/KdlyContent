@@ -11,6 +11,7 @@ import net.minecraft.item.ToolMaterials;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Lazy;
 import net.minecraft.util.registry.Registry;
 
 import java.text.MessageFormat;
@@ -44,11 +45,11 @@ public class ToolMaterialContentType implements ContentType {
 		//fun stuff for ingredients, whee
 		KDLNode repairNode = nodes.get("repairIngredient");
 		if (repairNode == null) throw new ParseException(id, "No repairIngredient specified");
-		Ingredient repairIng;
+		Lazy<Ingredient> repairIng;
 		if (repairNode.getProps().containsKey("tag")) {
-			repairIng = Ingredient.ofTag(TagKey.of(Registry.ITEM_KEY, new Identifier(repairNode.getProps().get("tag").getAsString().getValue())));
+			repairIng = new Lazy<>(() -> Ingredient.ofTag(TagKey.of(Registry.ITEM_KEY, new Identifier(repairNode.getProps().get("tag").getAsString().getValue()))));
 		} else {
-			repairIng = Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registry.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new));
+			repairIng = new Lazy<>(() -> Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registry.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new)));
 		}
 
 		ToolMaterial mat = new CustomToolMaterial(durability, miningSpeedMultiplier, attackDamage, miningLevel, enchantability, repairIng);
@@ -95,9 +96,9 @@ public class ToolMaterialContentType implements ContentType {
 		private final float attackDamage;
 		private final int miningLevel;
 		private final int enchantability;
-		private final Ingredient repairIngredient;
+		private final Lazy<Ingredient> repairIngredient;
 
-		private CustomToolMaterial(int durability, float miningSpeedMultiplier, float attackDamage, int miningLevel, int enchantability, Ingredient repairIngredient) {
+		private CustomToolMaterial(int durability, float miningSpeedMultiplier, float attackDamage, int miningLevel, int enchantability, Lazy<Ingredient> repairIngredient) {
 			this.durability = durability;
 			this.miningSpeedMultiplier = miningSpeedMultiplier;
 			this.attackDamage = attackDamage;
@@ -133,7 +134,7 @@ public class ToolMaterialContentType implements ContentType {
 
 		@Override
 		public Ingredient getRepairIngredient() {
-			return repairIngredient;
+			return repairIngredient.get();
 		}
 	}
 }
