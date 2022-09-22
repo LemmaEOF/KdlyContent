@@ -1,4 +1,4 @@
-package gay.lemmaeof.kdlycontent;
+package gay.lemmaeof.kdlycontent.util;
 
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
@@ -7,6 +7,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import java.util.ArrayList;
 
 //combination of Artemis' VoxelMath for axis blocks and Falkreon's VoxelMath for horizontal-facing blocks
+//not everything is used by KdlyContent itself but dependents might like it
 public class VoxelMath {
 	public static VoxelShape rotateX(VoxelShape shape) {
 		Box[] boxes = shapeToBoxes(shape);
@@ -38,9 +39,9 @@ public class VoxelMath {
 
 	public static VoxelShape[] rotationsOf(Box... boxes) {
 		VoxelShape[] result = new VoxelShape[4];
-		result[0] = shape(boxes);              //north
+		result[0] = shape(boxes); //north
 		result[1] = shape(rotate(180, boxes)); //south
-		result[2] = shape(rotate(90, boxes));  //west
+		result[2] = shape(rotate(90, boxes)); //west
 		result[3] = shape(rotate(270, boxes)); //east
 
 		return result;

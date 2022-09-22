@@ -1,8 +1,9 @@
-package gay.lemmaeof.kdlycontent;
+package gay.lemmaeof.kdlycontent.util;
 
 import dev.hbeck.kdl.objects.KDLNode;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.content.type.ToolMaterialContentType;
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import net.minecraft.item.*;
 import net.minecraft.util.Identifier;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;

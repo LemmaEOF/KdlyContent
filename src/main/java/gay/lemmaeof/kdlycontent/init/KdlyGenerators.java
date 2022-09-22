@@ -1,9 +1,9 @@
 package gay.lemmaeof.kdlycontent.init;
 
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.KdlHelper;
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.KdlyContent;
-import gay.lemmaeof.kdlycontent.KdlyTools;
+import gay.lemmaeof.kdlycontent.util.KdlyTools;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ItemGenerator;
@@ -34,7 +34,6 @@ public class KdlyGenerators {
 	public static final BlockGenerator WALL = registerBlockGen("wall", (id, settings, customConfig) -> new WallBlock(settings));
 	public static final BlockGenerator CUSTOM_BLOCK = registerBlockGen("custom", new CustomBlockGenerator());
 
-	//TODO: armor materials
 	public static final ItemGenerator STANDARD_ITEM = registerItemGen("standard", (id, settings, customConfig) -> new Item(settings));
 	public static final ItemGenerator PICKAXE = registerItemGen("pickaxe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools.KdlyPickaxe::new));
 	public static final ItemGenerator AXE = registerItemGen("axe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools.KdlyAxe::new));

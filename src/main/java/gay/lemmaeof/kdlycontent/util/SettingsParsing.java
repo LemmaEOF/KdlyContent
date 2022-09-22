@@ -1,7 +1,8 @@
-package gay.lemmaeof.kdlycontent;
+package gay.lemmaeof.kdlycontent.util;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
+import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;

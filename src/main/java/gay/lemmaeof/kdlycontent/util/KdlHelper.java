@@ -1,4 +1,4 @@
-package gay.lemmaeof.kdlycontent;
+package gay.lemmaeof.kdlycontent.util;
 
 import dev.hbeck.kdl.objects.KDLNode;
 

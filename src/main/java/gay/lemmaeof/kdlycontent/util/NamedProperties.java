@@ -1,4 +1,4 @@
-package gay.lemmaeof.kdlycontent;
+package gay.lemmaeof.kdlycontent.util;
 
 import net.minecraft.block.MapColor;
 import net.minecraft.block.Material;
@@ -222,6 +222,8 @@ public class NamedProperties {
 		MAP_COLORS.put("deepslate_gray", MapColor.DEEPSLATE_GRAY);
 		MAP_COLORS.put("raw_iron_pink", MapColor.RAW_IRON_PINK);
 		MAP_COLORS.put("lichen_green", MapColor.LICHEN_GREEN);
+
+		//Piston behaviors
 		PISTON_BEHAVIORS.put("push", PistonBehavior.NORMAL);
 		PISTON_BEHAVIORS.put("destroy", PistonBehavior.DESTROY);
 		PISTON_BEHAVIORS.put("block", PistonBehavior.BLOCK);

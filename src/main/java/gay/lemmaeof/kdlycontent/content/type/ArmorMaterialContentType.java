@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.KdlHelper;
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 

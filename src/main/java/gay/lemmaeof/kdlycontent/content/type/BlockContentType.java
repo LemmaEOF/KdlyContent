@@ -2,9 +2,9 @@ package gay.lemmaeof.kdlycontent.content.type;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.KdlHelper;
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ParseException;
-import gay.lemmaeof.kdlycontent.SettingsParsing;
+import gay.lemmaeof.kdlycontent.util.SettingsParsing;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
@@ -20,6 +20,7 @@ import java.util.*;
 
 public class BlockContentType implements ContentType {
 	public static final Map<Identifier, Block> KDLY_BLOCKS = new HashMap<>();
+	public static final Map<Block, String> KDLY_RENDER_LAYERS = new HashMap<>();
 
 	@Override
 	public void generateFrom(Identifier id, KDLNode parent) {
@@ -42,6 +43,12 @@ public class BlockContentType implements ContentType {
 		if (itemNode != null) {
 			QuiltItemSettings itemSettings = SettingsParsing.parseItemSettings(id, itemNode);
 			ItemContentType.KDLY_ITEMS.put(id, Registry.register(Registry.ITEM, id, new BlockItem(block, itemSettings)));
+		}
+
+		//render layers!
+		KDLNode renderLayerNode = nodes.get("renderLayer");
+		if (renderLayerNode != null) {
+			KDLY_RENDER_LAYERS.put(block, renderLayerNode.getArgs().get(0).getAsString().getValue());
 		}
 	}
 

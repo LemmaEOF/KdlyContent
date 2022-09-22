@@ -2,8 +2,8 @@ package gay.lemmaeof.kdlycontent.content.custom;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.KdlHelper;
-import gay.lemmaeof.kdlycontent.NamedProperties;
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
+import gay.lemmaeof.kdlycontent.util.NamedProperties;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import net.minecraft.block.Block;

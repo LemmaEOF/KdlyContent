@@ -1,6 +1,6 @@
 package gay.lemmaeof.kdlycontent.content.custom;
 
-import gay.lemmaeof.kdlycontent.VoxelMath;
+import gay.lemmaeof.kdlycontent.util.VoxelMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -140,12 +140,12 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 			case VERTICAL_DIRECTION: switch (props.placement) {
 				case SIDE -> {
 					if (ctx.getSide().getAxis() != Direction.Axis.Y)
-						return base.with(Properties.VERTICAL_DIRECTION, ctx.getVerticalPlayerLookDirection());
+						return base.with(Properties.VERTICAL_DIRECTION, ctx.getHitPos().y - (double)ctx.getBlockPos().getY() > 0.5? Direction.UP : Direction.DOWN);
 					return base.with(Properties.VERTICAL_DIRECTION, ctx.getSide());
 				}
 				case OPPOSITE_SIDE -> {
 					if (ctx.getSide().getAxis() != Direction.Axis.Y)
-						return base.with(Properties.VERTICAL_DIRECTION, ctx.getVerticalPlayerLookDirection().getOpposite());
+						return base.with(Properties.VERTICAL_DIRECTION, ctx.getHitPos().y - (double)ctx.getBlockPos().getY() > 0.5? Direction.DOWN : Direction.UP);
 					return base.with(Properties.VERTICAL_DIRECTION, ctx.getSide().getOpposite());
 				}
 				case PLAYER -> {
@@ -270,7 +270,8 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 		return shapes.get(state);
 	}
 
-	public record KdlyBlockProperties(boolean hasWaterlogged, RotationProperty rotProp, PlacementRule placement, VoxelShape defaultShape, PistonBehavior pistonBehavior, Map<FunctionPoint, Identifier> functions) { }
+	public record KdlyBlockProperties(boolean hasWaterlogged, RotationProperty rotProp, PlacementRule placement,
+									  VoxelShape defaultShape, PistonBehavior pistonBehavior, Map<FunctionPoint, Identifier> functions) { }
 
 	public enum RotationProperty {
 		FACING("facing", Properties.FACING),
@@ -279,6 +280,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 		AXIS("axis", Properties.AXIS),
 		HORIZONTAL_AXIS("horizontal_axis", Properties.HORIZONTAL_AXIS),
 		VERTICAL_DIRECTION("vertical_direction", Properties.VERTICAL_DIRECTION),
+		//TODO: 12-way facing
 		NONE("none", null);
 
 		private final String name;

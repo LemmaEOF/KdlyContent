@@ -2,9 +2,9 @@ package gay.lemmaeof.kdlycontent.content.type;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.KdlHelper;
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ParseException;
-import gay.lemmaeof.kdlycontent.SettingsParsing;
+import gay.lemmaeof.kdlycontent.util.SettingsParsing;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.ItemGenerator;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
