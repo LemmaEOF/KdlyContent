@@ -35,7 +35,7 @@ public class KdlyContent implements ModInitializer {
 		KdlyContentTypes.init();
 		KdlyGenerators.init();
 		//add an entrypoint for ensuring that people reg their content types and generators before we do!
-		QuiltLoader.getEntrypoints("kdlycontent", Runnable.class).forEach(Runnable::run);
+		QuiltLoader.getEntrypoints("kdlycontent:before", Runnable.class).forEach(Runnable::run);
 		ImmutableSet<ContentItem> data = ContentLoading.getAll("kdlycontent.kdl");
 		for (ContentItem item : data) {
 			String namespace = item.getIdentifier().getNamespace();
@@ -66,6 +66,7 @@ public class KdlyContent implements ModInitializer {
 			builder.append("and ").append(messages.get(messages.size() - 1));
 		}
 		LOGGER.info(builder.toString());
+		QuiltLoader.getEntrypoints("kdlycontent:after", Runnable.class).forEach(Runnable::run);
 	}
 
 	private String toSnakeCase(String original) {
