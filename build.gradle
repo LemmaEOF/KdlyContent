@@ -34,9 +34,9 @@ dependencies {
 
 	modImplementation libs.quilted.fabric.api
 
-	implementation libs.kdl
+	implementation "dev.hbeck.kdl:kdl4j:0.2.0"
 
-	include libs.kdl
+	include "dev.hbeck.kdl:kdl4j:0.2.0"
 }
 
 processResources {

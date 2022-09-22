@@ -8,6 +8,7 @@ import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ItemGenerator;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
+import gay.lemmaeof.kdlycontent.content.custom.CustomBlockGenerator;
 import gay.lemmaeof.kdlycontent.content.type.ArmorMaterialContentType;
 
 import net.minecraft.block.Block;
@@ -31,6 +32,7 @@ public class KdlyGenerators {
 		throw new ParseException(id, "No parent block found for stairs");
 	});
 	public static final BlockGenerator WALL = registerBlockGen("wall", (id, settings, customConfig) -> new WallBlock(settings));
+	public static final BlockGenerator CUSTOM_BLOCK = registerBlockGen("custom", new CustomBlockGenerator());
 
 	//TODO: armor materials
 	public static final ItemGenerator STANDARD_ITEM = registerItemGen("standard", (id, settings, customConfig) -> new Item(settings));

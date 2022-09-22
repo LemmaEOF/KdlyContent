@@ -2,6 +2,7 @@ package gay.lemmaeof.kdlycontent;
 
 import net.minecraft.block.MapColor;
 import net.minecraft.block.Material;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.sound.BlockSoundGroup;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ public class NamedProperties {
 	public static final Map<String, Material> MATERIALS = new HashMap<>();
 	public static final Map<String, BlockSoundGroup> SOUND_GROUPS = new HashMap<>();
 	public static final Map<String, MapColor> MAP_COLORS = new HashMap<>();
+	public static final Map<String, PistonBehavior> PISTON_BEHAVIORS = new HashMap<>();
 
 	static {
 		//if you appreciate the work I've put in transcribing all of this *by hand*,
@@ -86,8 +88,8 @@ public class NamedProperties {
 		SOUND_GROUPS.put("honey", BlockSoundGroup.HONEY);
 		SOUND_GROUPS.put("wet_grass", BlockSoundGroup.WET_GRASS);
 		SOUND_GROUPS.put("coral", BlockSoundGroup.CORAL);
-		SOUND_GROUPS.put("bamoo", BlockSoundGroup.BAMBOO);
-		SOUND_GROUPS.put("bamoo_sapling", BlockSoundGroup.BAMBOO_SAPLING);
+		SOUND_GROUPS.put("bamboo", BlockSoundGroup.BAMBOO);
+		SOUND_GROUPS.put("bamboo_sapling", BlockSoundGroup.BAMBOO_SAPLING);
 		SOUND_GROUPS.put("scaffolding", BlockSoundGroup.SCAFFOLDING);
 		SOUND_GROUPS.put("sweet_berry_bush", BlockSoundGroup.SWEET_BERRY_BUSH);
 		SOUND_GROUPS.put("crop", BlockSoundGroup.CROP);
@@ -220,5 +222,9 @@ public class NamedProperties {
 		MAP_COLORS.put("deepslate_gray", MapColor.DEEPSLATE_GRAY);
 		MAP_COLORS.put("raw_iron_pink", MapColor.RAW_IRON_PINK);
 		MAP_COLORS.put("lichen_green", MapColor.LICHEN_GREEN);
+		PISTON_BEHAVIORS.put("push", PistonBehavior.NORMAL);
+		PISTON_BEHAVIORS.put("destroy", PistonBehavior.DESTROY);
+		PISTON_BEHAVIORS.put("block", PistonBehavior.BLOCK);
+		PISTON_BEHAVIORS.put("push_only", PistonBehavior.PUSH_ONLY);
 	}
 }
