@@ -14,6 +14,8 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.function.CommandFunction;
+import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.*;
@@ -39,11 +41,13 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 		this.props = props;
 		for (BlockState state : this.getStateManager().getStates()) {
 			switch (props.rotProp) {
-				case AXIS, HORIZONTAL_AXIS -> shapes.put(state, switch ((Direction.Axis) state.get(props.rotProp.prop)) {
+				case AXIS -> shapes.put(state, switch ((Direction.Axis) state.get(props.rotProp.prop)) {
 					case X -> VoxelMath.rotateZ(props.defaultShape);
 					case Y -> props.defaultShape;
 					case Z -> VoxelMath.rotateX(props.defaultShape);
 				});
+				case HORIZONTAL_AXIS -> shapes.put(state, state.get(props.rotProp.prop) == Direction.Axis.X?
+						props.defaultShape : VoxelMath.rotate(90, props.defaultShape));
 				case FACING, VERTICAL_DIRECTION -> shapes.put(state, switch ((Direction) state.get(props.rotProp.prop)) {
 						case NORTH -> VoxelMath.rotateX(props.defaultShape);
 						case SOUTH -> VoxelMath.rotate(180, VoxelMath.rotateX(props.defaultShape));
@@ -79,7 +83,8 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 			};
 			case HORIZONTAL_AXIS: switch (props.placement) {
 				case SIDE, OPPOSITE_SIDE -> {
-					if (ctx.getSide().getAxis() == Direction.Axis.Y) return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerFacing().getAxis());
+					if (ctx.getSide().getAxis() == Direction.Axis.Y)
+						return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerFacing().getAxis());
 					return base.with(Properties.HORIZONTAL_AXIS, ctx.getSide().getAxis());
 				}
 				case PLAYER, OPPOSITE_PLAYER -> {
@@ -94,11 +99,13 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 			};
 			case HORIZONTAL_FACING: switch(props.placement) {
 				case SIDE -> {
-					if (ctx.getSide().getAxis() == Direction.Axis.Y) return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing());
+					if (ctx.getSide().getAxis() == Direction.Axis.Y)
+						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing());
 					return base.with(Properties.HORIZONTAL_FACING, ctx.getSide());
 				}
 				case OPPOSITE_SIDE -> {
-					if (ctx.getSide().getAxis() == Direction.Axis.Y) return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite());
+					if (ctx.getSide().getAxis() == Direction.Axis.Y)
+						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite());
 					return base.with(Properties.HORIZONTAL_FACING, ctx.getSide().getOpposite());
 				}
 				case PLAYER -> {
@@ -110,29 +117,35 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 			}
 			case HOPPER_FACING: switch (props.placement) {
 				case SIDE -> {
-					if (ctx.getSide() == Direction.UP) return base.with(Properties.HOPPER_FACING, Direction.DOWN);
+					if (ctx.getSide() == Direction.UP)
+						return base.with(Properties.HOPPER_FACING, Direction.DOWN);
 					return base.with(Properties.HOPPER_FACING, ctx.getSide());
 				}
 				case OPPOSITE_SIDE -> {
-					if (ctx.getSide() == Direction.DOWN) return base.with(Properties.HOPPER_FACING, Direction.DOWN);
+					if (ctx.getSide() == Direction.DOWN)
+						return base.with(Properties.HOPPER_FACING, Direction.DOWN);
 					return base.with(Properties.HOPPER_FACING, ctx.getSide().getOpposite());
 				}
 				case PLAYER -> {
-					if (ctx.getPlayerLookDirection() == Direction.UP) return base.with(Properties.HOPPER_FACING, Direction.DOWN);
+					if (ctx.getPlayerLookDirection() == Direction.UP)
+						return base.with(Properties.HOPPER_FACING, Direction.DOWN);
 					return base.with(Properties.HOPPER_FACING, ctx.getPlayerLookDirection());
 				}
 				case OPPOSITE_PLAYER -> {
-					if (ctx.getPlayerLookDirection() == Direction.DOWN) return base.with(Properties.HOPPER_FACING, Direction.DOWN);
+					if (ctx.getPlayerLookDirection() == Direction.DOWN)
+						return base.with(Properties.HOPPER_FACING, Direction.DOWN);
 					return base.with(Properties.HOPPER_FACING, ctx.getPlayerLookDirection().getOpposite());
 				}
 			}
 			case VERTICAL_DIRECTION: switch (props.placement) {
 				case SIDE -> {
-					if (ctx.getSide().getAxis() != Direction.Axis.Y) return base.with(Properties.VERTICAL_DIRECTION, ctx.getVerticalPlayerLookDirection());
+					if (ctx.getSide().getAxis() != Direction.Axis.Y)
+						return base.with(Properties.VERTICAL_DIRECTION, ctx.getVerticalPlayerLookDirection());
 					return base.with(Properties.VERTICAL_DIRECTION, ctx.getSide());
 				}
 				case OPPOSITE_SIDE -> {
-					if (ctx.getSide().getAxis() != Direction.Axis.Y) return base.with(Properties.VERTICAL_DIRECTION, ctx.getVerticalPlayerLookDirection().getOpposite());
+					if (ctx.getSide().getAxis() != Direction.Axis.Y)
+						return base.with(Properties.VERTICAL_DIRECTION, ctx.getVerticalPlayerLookDirection().getOpposite());
 					return base.with(Properties.VERTICAL_DIRECTION, ctx.getSide().getOpposite());
 				}
 				case PLAYER -> {
@@ -160,14 +173,42 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		//TODO: impl
-		return super.rotate(state, rotation);
+		BlockState base = super.rotate(state, rotation);
+		switch (props.rotProp) {
+			case FACING, HORIZONTAL_FACING, HOPPER_FACING -> {
+				return base.with((DirectionProperty) props.rotProp.prop, rotation.rotate((Direction) state.get(props.rotProp.prop)));
+			}
+			case AXIS, HORIZONTAL_AXIS -> {
+				if (rotation == BlockRotation.CLOCKWISE_90 || rotation == BlockRotation.COUNTERCLOCKWISE_90) {
+					return switch ((Direction.Axis) state.get(props.rotProp.prop)) {
+						case X -> base.with((EnumProperty<Direction.Axis>) props.rotProp.prop, Direction.Axis.Z);
+						case Z -> base.with((EnumProperty<Direction.Axis>) props.rotProp.prop, Direction.Axis.X);
+						default -> base;
+					};
+				} else {
+					return base;
+				}
+			}
+			default -> {
+				return base;
+			}
+		}
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
-		//TODO: impl
-		return super.mirror(state, mirror);
+		BlockState base = super.mirror(state, mirror);
+		switch (props.rotProp) {
+			case FACING, HORIZONTAL_FACING, HOPPER_FACING -> {
+				Direction dir = (Direction) base.get(props.rotProp.prop);
+				if (dir.getAxis() == Direction.Axis.Y) return base;
+				return base.with((DirectionProperty) props.rotProp.prop, mirror.apply(dir));
+			}
+			default -> {
+				//mirroring is only for horizontal axes, so vertical direction, axis, and no rot prop stay the same
+				return base;
+			}
+		}
 	}
 
 	private boolean runFunction(World world, BlockPos pos, @Nullable Entity user, FunctionPoint point) {
