@@ -32,6 +32,7 @@ public class KdlyGenerators {
 		throw new ParseException(id, "No parent block found for stairs");
 	});
 	public static final BlockGenerator WALL = registerBlockGen("wall", (id, settings, customConfig) -> new WallBlock(settings));
+	//TODO: other block presets
 	public static final BlockGenerator CUSTOM_BLOCK = registerBlockGen("custom", new CustomBlockGenerator());
 
 	public static final ItemGenerator STANDARD_ITEM = registerItemGen("standard", (id, settings, customConfig) -> new Item(settings));
@@ -56,6 +57,7 @@ public class KdlyGenerators {
 		};
 		return new ArmorItem(armor, slot, settings);
 	});
+	//TODO: custom item
 
 	private static BlockGenerator registerBlockGen(String name, BlockGenerator generator) {
 		return Registry.register(KdlyRegistries.BLOCK_GENERATORS, new Identifier(KdlyContent.MODID, name), generator);

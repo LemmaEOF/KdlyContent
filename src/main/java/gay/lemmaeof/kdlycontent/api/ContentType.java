@@ -24,4 +24,5 @@ public interface ContentType {
 
 	void generateFrom(Identifier id, KDLNode parent) throws ParseException;
 	Optional<String> getApplyMessage();
+	default boolean needsIdentifier() { return true; }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
 import dev.hbeck.kdl.parse.KDLParser;
+import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.content.ContentItem;
@@ -41,15 +42,7 @@ public class KdlyContent implements ModInitializer {
 			String namespace = item.getIdentifier().getNamespace();
 			try {
 				KDLDocument kdl = parser.parse(item.createInputStream());
-				for (KDLNode node : kdl.getNodes()) {
-					String name = node.getArgs().get(0).getAsString().getValue();
-					Identifier id = new Identifier(namespace, name);
-					String type = toSnakeCase(node.getIdentifier());
-					if (!type.contains(":")) type = "kdlycontent:" + type;
-					Identifier typeId = new Identifier(type);
-					if (KdlyRegistries.CONTENT_TYPES.containsId(typeId)) KdlyRegistries.CONTENT_TYPES.get(typeId).generateFrom(id, node);
-					else throw new ParseException(id, "Content type `" + node.getIdentifier() + "` not found (converted to `" + typeId + "`)");
-				}
+				parseKdl(namespace, kdl);
 			} catch (IOException | ParseException e) {
 				throw new RuntimeException("Could not load KDL for file " + item.getIdentifier(), e);
 			}
@@ -69,7 +62,26 @@ public class KdlyContent implements ModInitializer {
 		QuiltLoader.getEntrypoints("kdlycontent:after", Runnable.class).forEach(Runnable::run);
 	}
 
-	private String toSnakeCase(String original) {
+	protected void parseKdl(String namespace, KDLDocument kdl) {
+		for (KDLNode node : kdl.getNodes()) {
+			Identifier id = new Identifier(namespace, "anonymous");
+			String typeName = toSnakeCase(node.getIdentifier());
+			if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
+			Identifier typeId = new Identifier(typeName);
+			if (KdlyRegistries.CONTENT_TYPES.containsId(typeId)) {
+				ContentType type = KdlyRegistries.CONTENT_TYPES.get(typeId);
+				if (type.needsIdentifier()) {
+					String name = node.getArgs().get(0).getAsString().getValue();
+					id = new Identifier(namespace, name);
+				}
+				type.generateFrom(id, node);
+			} else {
+				throw new ParseException(id, "Content type `" + node.getIdentifier() + "` not found (converted to `" + typeId + "`)");
+			}
+		}
+	}
+
+	protected String toSnakeCase(String original) {
 		//this may be considered sliiiightly evil, my condolences
 		String regex = "([a-z])([A-Z]+)";
 		String replacement = "$1_$2";
