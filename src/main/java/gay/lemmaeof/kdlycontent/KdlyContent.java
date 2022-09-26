@@ -46,7 +46,6 @@ public class KdlyContent implements ModInitializer {
 			} catch (IOException | ParseException e) {
 				throw new RuntimeException("Could not load KDL for file " + item.getIdentifier(), e);
 			}
-
 		}
 		StringBuilder builder = new StringBuilder("Registered ");
 		List<String> messages = new ArrayList<>();
@@ -88,5 +87,4 @@ public class KdlyContent implements ModInitializer {
 		original = original.replaceAll(regex, replacement).toLowerCase();
 		return original;
 	}
-
 }

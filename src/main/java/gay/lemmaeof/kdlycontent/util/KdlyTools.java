@@ -16,8 +16,8 @@ public class KdlyTools {
 	public static Item construct(Identifier id, QuiltItemSettings settings, List<KDLNode> customConfig, ToolCreator creator) {
 		Map<String, KDLNode> nodes = KdlHelper.mapNodes(customConfig);
 		//TODO: ability to define material in-line
-		KDLNode materialNode = nodes.get("toolMaterial");
-		if (materialNode == null) throw new ParseException(id, "No toolMaterial specified");
+		KDLNode materialNode = nodes.get("material");
+		if (materialNode == null) throw new ParseException(id, "No material specified");
 		String matId = materialNode.getArgs().get(0).getAsString().getValue();
 		ToolMaterial mat = ToolMaterialContentType.getMaterial(matId, id);
 		KDLNode attackDamageNode = nodes.get("attackDamage");
