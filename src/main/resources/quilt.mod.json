@@ -19,7 +19,8 @@
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
-			"init": "gay.lemmaeof.kdlycontent.KdlyContent"
+			"init": "gay.lemmaeof.kdlycontent.KdlyContent",
+			"client_init": "gay.lemmaeof.kdlycontent.client.KdlyContentClient"
 		},
 		"depends": [
 			{
@@ -32,11 +33,7 @@
 			},
 			{
 				"id": "minecraft",
-				"versions": ">=1.18.2"
-			},
-			{
-				"id": "staticdata",
-				"versions": "*"
+				"versions": ">=1.19"
 			}
 		]
 	}
