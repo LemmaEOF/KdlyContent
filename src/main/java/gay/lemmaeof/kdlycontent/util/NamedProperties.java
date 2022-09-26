@@ -67,8 +67,6 @@ public class NamedProperties {
 		MATERIALS.put("cake", Material.CAKE);
 		MATERIALS.put("amethyst", Material.AMETHYST);
 		MATERIALS.put("powder_snow", Material.POWDER_SNOW);
-		MATERIALS.put("frog_spawn", Material.FROG_SPAWN);
-		MATERIALS.put("froglight", Material.FROGLIGHT);
 
 		//Block sound groups
 		SOUND_GROUPS.put("wood", BlockSoundGroup.WOOD);
@@ -142,22 +140,11 @@ public class NamedProperties {
 		SOUND_GROUPS.put("hanging_roots", BlockSoundGroup.HANGING_ROOTS);
 		SOUND_GROUPS.put("azalea_leaves", BlockSoundGroup.AZALEA_LEAVES);
 		SOUND_GROUPS.put("sculk_sensor", BlockSoundGroup.SCULK_SENSOR);
-		SOUND_GROUPS.put("sculk_catalyst", BlockSoundGroup.SCULK_CATALYST);
-		SOUND_GROUPS.put("sculk", BlockSoundGroup.SCULK);
-		SOUND_GROUPS.put("sculk_vein", BlockSoundGroup.SCULK_VEIN);
-		SOUND_GROUPS.put("sculk_shrieker", BlockSoundGroup.SCULK_SHRIEKER);
 		SOUND_GROUPS.put("glow_lichen", BlockSoundGroup.GLOW_LICHEN);
 		SOUND_GROUPS.put("deepslate", BlockSoundGroup.DEEPSLATE);
 		SOUND_GROUPS.put("deepslate_bricks", BlockSoundGroup.DEEPSLATE_BRICKS);
 		SOUND_GROUPS.put("deepslate_tiles", BlockSoundGroup.DEEPSLATE_TILES);
 		SOUND_GROUPS.put("polished_deepslate", BlockSoundGroup.POLISHED_DEEPSLATE);
-		SOUND_GROUPS.put("froglight", BlockSoundGroup.FROGLIGHT);
-		SOUND_GROUPS.put("frogspawn", BlockSoundGroup.FROGSPAWN);
-		SOUND_GROUPS.put("mangrove_roots", BlockSoundGroup.MANGROVE_ROOTS);
-		SOUND_GROUPS.put("muddy_mangrove_roots", BlockSoundGroup.MUDDY_MANGROVE_ROOTS);
-		SOUND_GROUPS.put("mud", BlockSoundGroup.MUD);
-		SOUND_GROUPS.put("mud_bricks", BlockSoundGroup.MUD_BRICKS);
-		SOUND_GROUPS.put("packed_mud", BlockSoundGroup.PACKED_MUD);
 
 		//Map colors
 		MAP_COLORS.put("clear", MapColor.CLEAR);
