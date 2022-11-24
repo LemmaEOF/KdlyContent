@@ -86,6 +86,5 @@ public class KdlyContent implements ModInitializer {
 		String replacement = "$1_$2";
 		original = original.replaceAll(regex, replacement).toLowerCase();
 		return original;
-
 	}
 }
