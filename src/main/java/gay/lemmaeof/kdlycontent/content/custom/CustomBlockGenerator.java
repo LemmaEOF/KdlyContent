@@ -23,6 +23,20 @@ import java.util.Map;
 public class CustomBlockGenerator implements BlockGenerator {
 	@Override
 	public Block generateBlock(Identifier id, QuiltBlockSettings settings, List<KDLNode> customConfig) throws ParseException {
+		CustomBlock.KdlyBlockProperties props = parseProperties(id, customConfig);
+
+		return new CustomBlock(settings, props) {
+			@Override
+			protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+				super.appendProperties(builder);
+				if (props.hasWaterlogged()) builder.add(Properties.WATERLOGGED);
+				if (props.rotProp() != RotationProperty.NONE) builder.add(props.rotProp().getProp());
+			}
+		};
+	}
+
+	//TODO: generify even more but this at least makes it much less painful to extend CustomBlock and such
+	protected CustomBlock.KdlyBlockProperties parseProperties(Identifier id, List<KDLNode> customConfig) {
 		boolean hasWaterlogged = false;
 		CustomBlock.RotationProperty rotationProp = CustomBlock.RotationProperty.NONE;
 		CustomBlock.PlacementRule placementRule = CustomBlock.PlacementRule.PLAYER;
@@ -86,15 +100,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 			}
 		}
 
-		CustomBlock.KdlyBlockProperties props = new CustomBlock.KdlyBlockProperties(hasWaterlogged, rotationProp, placementRule, defaultShape, behavior, functions);
-
-		return new CustomBlock(settings, props) {
-			@Override
-			protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-				super.appendProperties(builder);
-				if (props.hasWaterlogged()) builder.add(Properties.WATERLOGGED);
-				if (props.rotProp() != RotationProperty.NONE) builder.add(props.rotProp().getProp());
-			}
-		};
+		return new CustomBlock.KdlyBlockProperties(hasWaterlogged, rotationProp, placementRule, defaultShape, behavior, functions);
 	}
+
 }

@@ -1,5 +1,6 @@
 package gay.lemmaeof.kdlycontent.client;
 
+import com.unascribed.lib39.core.api.ClientModPostInitializer;
 import gay.lemmaeof.kdlycontent.content.type.BlockContentType;
 import net.minecraft.block.Block;
 import net.minecraft.client.render.RenderLayer;
@@ -10,11 +11,11 @@ import org.quiltmc.qsl.block.extensions.api.client.BlockRenderLayerMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KdlyContentClient implements ClientModInitializer {
+public class KdlyContentClient implements ClientModPostInitializer {
 	public static final Map<String, RenderLayer> RENDER_LAYERS = new HashMap<>();
 
 	@Override
-	public void onInitializeClient(ModContainer mod) {
+	public void onPostInitializeClient() {
 		for (Block block : BlockContentType.KDLY_RENDER_LAYERS.keySet()) {
 			BlockRenderLayerMap.put(RENDER_LAYERS.get(BlockContentType.KDLY_RENDER_LAYERS.get(block)), block);
 		}
