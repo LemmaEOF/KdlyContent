@@ -94,6 +94,7 @@ public class KdlyContent implements ModPostInitializer {
 							throw new ParseException(id, "No templates for content type `" + node.getIdentifier() + "` found (converted to `" + typeId + "`)");
 						}
 					} else {
+						//TODO: multiple IDs for quick-instantiation
 						type.generateFrom(id, node);
 					}
 				}
