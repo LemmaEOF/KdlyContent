@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -169,6 +170,12 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 			}
 		}
 		return base;
+	}
+
+	public FluidState getFluidState(BlockState state) {
+	  return state.contains(Properties.WATERLOGGED) && state.get(Properties.WATERLOGGED)
+		? Fluids.WATER.getStill(false)
+		: super.getFluidState(state);
 	}
 
 	@Override
