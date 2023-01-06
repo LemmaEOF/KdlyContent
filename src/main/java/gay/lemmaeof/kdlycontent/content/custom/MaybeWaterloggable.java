@@ -20,17 +20,12 @@ public interface MaybeWaterloggable extends Waterloggable {
 	@Override
 	default boolean canFillWithFluid(BlockView world, BlockPos pos, BlockState state, Fluid fluid) {
 		return state.contains(Properties.WATERLOGGED) && !state.get(Properties.WATERLOGGED) && fluid == Fluids.WATER;
-}
+	}
 
 	@Override
 	default boolean tryFillWithFluid(WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
-		if (state.contains(Properties.WATERLOGGED) && !state.get(Properties.WATERLOGGED) && fluidState.getFluid() == Fluids.WATER) {
-			if (!world.isClient()) {
-				world.setBlockState(pos, state.with(Properties.WATERLOGGED, true), 3);
-				world.scheduleFluidTick(pos, fluidState.getFluid(), fluidState.getFluid().getTickRate(world));
-			}
-
-			return true;
+		if (state.contains(Properties.WATERLOGGED)) {
+			return Waterloggable.super.tryFillWithFluid(world, pos, state, fluidState);
 		} else {
 			return false;
 		}
@@ -38,21 +33,10 @@ public interface MaybeWaterloggable extends Waterloggable {
 
 	@Override
 	default ItemStack tryDrainFluid(WorldAccess world, BlockPos pos, BlockState state) {
-		if (state.contains(Properties.WATERLOGGED) && state.get(Properties.WATERLOGGED)) {
-			world.setBlockState(pos, state.with(Properties.WATERLOGGED, false), 3);
-			if (!state.canPlaceAt(world, pos)) {
-				world.breakBlock(pos, true);
-			}
-
-			return new ItemStack(Items.WATER_BUCKET);
+		if (state.contains(Properties.WATERLOGGED)) {
+			return Waterloggable.super.tryDrainFluid(world, pos, state);
 		} else {
 			return ItemStack.EMPTY;
 		}
 	}
-
-	@Override
-	default Optional<SoundEvent> getBucketFillSound() {
-		return Fluids.WATER.getBucketFillSound();
-	}
-
 }
