@@ -109,9 +109,23 @@ public class NamedProperties {
 		SOUND_GROUPS.put("mud", BlockSoundGroup.MUD);
 		SOUND_GROUPS.put("mud_bricks", BlockSoundGroup.MUD_BRICKS);
 		SOUND_GROUPS.put("packed_mud", BlockSoundGroup.PACKED_MUD);
+		SOUND_GROUPS.put("hanging_sign", BlockSoundGroup.HANGING_SIGN);
+		SOUND_GROUPS.put("nether_hanging_sign", BlockSoundGroup.NETHER_HANGING_SIGN);
+		SOUND_GROUPS.put("bamboo_hanging_sign", BlockSoundGroup.BAMBOO_HANGING_SIGN);
+		SOUND_GROUPS.put("bamboo_wood", BlockSoundGroup.BAMBOO_WOOD);
+		SOUND_GROUPS.put("nether_wood", BlockSoundGroup.NETHER_WOOD);
+		SOUND_GROUPS.put("cherry_wood", BlockSoundGroup.CHERRY_WOOD);
+		SOUND_GROUPS.put("cherry_sapling", BlockSoundGroup.CHERRY_SAPLING);
+		SOUND_GROUPS.put("cherry_leaves", BlockSoundGroup.CHERRY_LEAVES);
+		SOUND_GROUPS.put("cherry_hanging_sign", BlockSoundGroup.CHERRY_HANGING_SIGN);
+		SOUND_GROUPS.put("chiseled_bookshelf", BlockSoundGroup.CHISELED_BOOKSHELF);
+		SOUND_GROUPS.put("suspicious_sand", BlockSoundGroup.SUSPICIOUS_SAND);
+		SOUND_GROUPS.put("suspicious_gravel", BlockSoundGroup.SUSPICIOUS_GRAVEL);
+		SOUND_GROUPS.put("decorated_pot", BlockSoundGroup.DECORATED_POT);
+		SOUND_GROUPS.put("cracked_decorated_pot", BlockSoundGroup.CRACKED_DECORATED_POT);
 
 		//Map colors
-		MAP_COLORS.put("clear", MapColor.NONE);
+		MAP_COLORS.put("none", MapColor.NONE);
 		MAP_COLORS.put("grass", MapColor.GRASS);
 		MAP_COLORS.put("sand", MapColor.SAND);
 		MAP_COLORS.put("wool", MapColor.WOOL);

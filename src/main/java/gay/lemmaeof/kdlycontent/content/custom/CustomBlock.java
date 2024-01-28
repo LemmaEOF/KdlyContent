@@ -14,15 +14,14 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.function.CommandFunction;
-import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.state.property.Property;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.*;
 import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.random.RandomGenerator;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
@@ -34,6 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class CustomBlock extends Block implements MaybeWaterloggable {
+	private static final BooleanProperty POWERED = Properties.POWERED;
 	private final KdlyBlockProperties props;
 	private final Map<BlockState, VoxelShape> shapes = new HashMap<>();
 	public CustomBlock(Settings settings, KdlyBlockProperties props) {
@@ -157,6 +157,32 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 			}
 			default:
 				return base;
+		}
+	}
+
+	@Override
+	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+		if (state.contains(POWERED)) {
+			boolean isGettingPowered = world.isReceivingRedstonePower(pos) || world.isReceivingRedstonePower(pos.up());
+			boolean isAlreadyPowered = state.get(POWERED);
+			if (isGettingPowered && !isAlreadyPowered) {
+				world.scheduleBlockTick(pos, this, 4);
+				world.setBlockState(pos, state.with(POWERED, true), 4);
+			} else if (!isGettingPowered && isAlreadyPowered) {
+				world.scheduleBlockTick(pos, this, 4);
+				world.setBlockState(pos, state.with(POWERED, false), 4);
+			}
+		}
+	}
+
+	@Override
+	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, RandomGenerator random) {
+		if (state.contains(POWERED)) {
+			if (state.get(POWERED)) {
+				this.runFunction(world, pos, null, FunctionPoint.POWERED);
+			} else {
+				this.runFunction(world, pos, null, FunctionPoint.UNPOWERED);
+			}
 		}
 	}
 
@@ -342,7 +368,9 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 		REMOVED("removed"),
 		USED("used"),
 		PUNCHED("punched"),
-		SHOT("shot");
+		SHOT("shot"),
+		POWERED("powered"),
+		UNPOWERED("unpowered");
 
 		private final String name;
 

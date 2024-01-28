@@ -31,6 +31,8 @@ public class CustomBlockGenerator implements BlockGenerator {
 				super.appendProperties(builder);
 				if (props.hasWaterlogged()) builder.add(Properties.WATERLOGGED);
 				if (props.rotProp() != RotationProperty.NONE) builder.add(props.rotProp().getProp());
+				if (props.functions().containsKey(FunctionPoint.POWERED) || props.functions().containsKey(FunctionPoint.UNPOWERED))
+					builder.add(Properties.POWERED);
 			}
 		};
 	}
