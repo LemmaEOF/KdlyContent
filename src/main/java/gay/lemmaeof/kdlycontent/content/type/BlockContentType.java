@@ -2,7 +2,6 @@ package gay.lemmaeof.kdlycontent.content.type;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.util.SettingsParsing;
@@ -34,7 +33,7 @@ public class BlockContentType implements ContentType {
 		}
 		QuiltBlockSettings settings = SettingsParsing.parseBlockSettings(id, settingsNode);
 		KDLNode generatorNode = nodes.get("type");
-		String typeName = generatorNode == null? "kdlycontent:standard" : generatorNode.getArgs().get(0).getAsString().getValue();
+		String typeName = generatorNode == null? "kdlycontent:standard" : KdlHelper.getArg(generatorNode, 0, "kdlycontent:standard");
 		if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
 		List<KDLNode> customConfig = generatorNode == null? Collections.emptyList() : generatorNode.getChild().orElse(KDLDocument.builder().build()).getNodes();
 		BlockGenerator gen = KdlyRegistries.BLOCK_GENERATORS.get(new Identifier(typeName));
@@ -44,11 +43,8 @@ public class BlockContentType implements ContentType {
 		//item settings time!
 		KDLNode itemNode = nodes.get("item");
 		if (itemNode != null) {
-			ItemGroup group = KdlyContent.GROUP;
-			if (itemNode.getProps().containsKey("group")) {
-				Identifier groupId = new Identifier(itemNode.getProps().get("group").getAsString().getValue());
-				group = Registries.ITEM_GROUP.get(groupId);
-			}
+			Identifier groupId = new Identifier(KdlHelper.getProp(itemNode, "group", "kdlycontent:generated"));
+			ItemGroup group = Registries.ITEM_GROUP.get(groupId);
 			QuiltItemSettings itemSettings = SettingsParsing.parseItemSettings(id, itemNode);
 			BlockItem item = new BlockItem(block, itemSettings);
 			ItemContentType.KDLY_ITEMS.put(id, Registry.register(Registries.ITEM, id, item));
@@ -58,7 +54,7 @@ public class BlockContentType implements ContentType {
 		//render layers!
 		KDLNode renderLayerNode = nodes.get("renderLayer");
 		if (renderLayerNode != null) {
-			KDLY_RENDER_LAYERS.put(block, renderLayerNode.getArgs().get(0).getAsString().getValue());
+			KDLY_RENDER_LAYERS.put(block, KdlHelper.getArg(renderLayerNode, 0, "solid"));
 		}
 	}
 

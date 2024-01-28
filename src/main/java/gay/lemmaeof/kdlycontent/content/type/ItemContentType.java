@@ -33,10 +33,10 @@ public class ItemContentType implements ContentType {
 		QuiltItemSettings settings = SettingsParsing.parseItemSettings(id, settingsNode);
 		ItemGroup group = KdlyContent.GROUP;
 		if (nodes.containsKey("group")) {
-			group = Registries.ITEM_GROUP.get(new Identifier(nodes.get("group").getArgs().get(0).getAsString().getValue()));
+			group = Registries.ITEM_GROUP.get(new Identifier(KdlHelper.getArg(nodes.get("group"), 0, "kdlycontent:generated")));
 		}
 		KDLNode generatorNode = nodes.get("type");
-		String typeName = generatorNode == null? "kdlycontent:standard" : generatorNode.getArgs().get(0).getAsString().getValue();
+		String typeName = generatorNode == null? "kdlycontent:standard" : KdlHelper.getArg(generatorNode, 0, "kdlycontent:standard");
 		if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
 		List<KDLNode> customConfig = generatorNode == null? Collections.emptyList() : generatorNode.getChild().orElse(KDLDocument.builder().build()).getNodes();
 		ItemGenerator gen = KdlyRegistries.ITEM_GENERATORS.get(new Identifier(typeName));

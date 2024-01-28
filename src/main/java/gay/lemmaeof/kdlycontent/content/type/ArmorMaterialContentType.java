@@ -37,7 +37,7 @@ public class ArmorMaterialContentType implements ContentType {
 		EnumMap<ArmorItem.ArmorSlot, Integer> durability = new EnumMap<>(ArmorItem.ArmorSlot.class);
 		if (nodes.containsKey("durabilityMultiplier")) {
 			KDLNode node = nodes.get("durabilityMultiplier");
-			int multiplier = node.getArgs().get(0).getAsNumberOrElse(0).intValue();
+			int multiplier = KdlHelper.getArg(node, 0, 0);
 			durability.put(ArmorItem.ArmorSlot.HELMET, multiplier * BASE_DURABILITY[0]);
 			durability.put(ArmorItem.ArmorSlot.CHESTPLATE, multiplier * BASE_DURABILITY[1]);
 			durability.put(ArmorItem.ArmorSlot.LEGGINGS, multiplier * BASE_DURABILITY[2]);
@@ -52,16 +52,16 @@ public class ArmorMaterialContentType implements ContentType {
 		EnumMap<ArmorItem.ArmorSlot, Integer> protection = parseSlots(id, protectionNode);
 		KDLNode toughnessNode = nodes.get("toughness");
 		if (toughnessNode == null) throw new ParseException(id, "No toughness specified");
-		float toughness = toughnessNode.getArgs().get(0).getAsNumberOrElse(0).floatValue();
+		float toughness = KdlHelper.getArg(toughnessNode, 0, 0f);
 		KDLNode resistanceNode = nodes.get("knockbackResistance");
 		if (resistanceNode == null) throw new ParseException(id, "No knockbackResistance specified");
-		float knockbackResistance = toughnessNode.getArgs().get(0).getAsNumberOrElse(0).floatValue();
+		float knockbackResistance = KdlHelper.getArg(toughnessNode, 0, 0f);
 		KDLNode enchantabilityNode = nodes.get("enchantability");
 		if (enchantabilityNode == null) throw new ParseException(id, "No enchantability specified");
-		int enchantability = enchantabilityNode.getArgs().get(0).getAsNumberOrElse(0).intValue();
+		int enchantability = KdlHelper.getArg(enchantabilityNode, 0, 0);
 		KDLNode equipSoundNode = nodes.get("equipSound");
 		if (equipSoundNode == null) throw new ParseException(id, "No equipSound specified");
-		SoundEvent equipSound = Registries.SOUND_EVENT.get(new Identifier(equipSoundNode.getArgs().get(0).getAsString().getValue()));
+		SoundEvent equipSound = Registries.SOUND_EVENT.get(new Identifier(KdlHelper.getArg(equipSoundNode, 0, "")));
 
 		//fun stuff for ingredients, whee
 		KDLNode repairNode = nodes.get("repairIngredient");
@@ -99,10 +99,10 @@ public class ArmorMaterialContentType implements ContentType {
 			if (legs == null) throw new ParseException(id, "No leggings value specified");
 			KDLNode feet = nodes.get("boots");
 			if (feet == null) throw new ParseException(id, "No boots value specified");
-			ret.put(ArmorItem.ArmorSlot.HELMET, head.getArgs().get(0).getAsNumberOrElse(0).intValue());
-			ret.put(ArmorItem.ArmorSlot.CHESTPLATE, chest.getArgs().get(0).getAsNumberOrElse(0).intValue());
-			ret.put(ArmorItem.ArmorSlot.LEGGINGS, legs.getArgs().get(0).getAsNumberOrElse(0).intValue());
-			ret.put(ArmorItem.ArmorSlot.BOOTS, feet.getArgs().get(0).getAsNumberOrElse(0).intValue());
+			ret.put(ArmorItem.ArmorSlot.HELMET, KdlHelper.getArg(head, 0, 0));
+			ret.put(ArmorItem.ArmorSlot.CHESTPLATE, KdlHelper.getArg(chest, 0, 0));
+			ret.put(ArmorItem.ArmorSlot.LEGGINGS, KdlHelper.getArg(legs, 0, 0));
+			ret.put(ArmorItem.ArmorSlot.BOOTS, KdlHelper.getArg(feet, 0, 0));
 		} else {
 			ret.put(ArmorItem.ArmorSlot.HELMET, KdlHelper.getProp(node, "helmet", 0));
 			ret.put(ArmorItem.ArmorSlot.CHESTPLATE, KdlHelper.getProp(node, "chestplate", 0));

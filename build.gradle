@@ -1,6 +1,6 @@
 plugins {
 	id 'maven-publish'
-	id 'org.quiltmc.loom' version '0.12.+'
+	id 'org.quiltmc.loom' version '1.4.1'
 }
 
 archivesBaseName = project.archives_base_name
@@ -47,6 +47,20 @@ dependencies {
 	implementation include("dev.hbeck.kdl:kdl4j:${project.kdl4j_version}")
 	modImplementation include("com.unascribed:lib39-core:${project.lib39_version}")
 	modImplementation include("maven.modrinth:static-data:${project.staticdata_version}")
+}
+
+loom {
+	// Loom and Loader both use this block in order to gather more information about your mod.
+	mods {
+		// This should match your mod id.
+		"kdlycontent" {
+			// Tell Loom about each source set used by your mod here. This ensures that your mod's classes are properly transformed by Loader.
+			sourceSet("main")
+			// If you shade (directly include classes, not JiJ) a dependency into your mod, include it here using one of these methods:
+			// dependency("com.example.shadowedmod:1.2.3")
+			// configuration("exampleShadedConfigurationName")
+		}
+	}
 }
 
 processResources {

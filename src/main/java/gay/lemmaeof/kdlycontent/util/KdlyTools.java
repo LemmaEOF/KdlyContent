@@ -22,10 +22,10 @@ public class KdlyTools {
 		ToolMaterial mat = ToolMaterialContentType.getMaterial(matId, id);
 		KDLNode attackDamageNode = nodes.get("attackDamage");
 		if (attackDamageNode == null) throw new ParseException(id, "No attackDamage specified");
-		float attackDamage = attackDamageNode.getArgs().get(0).getAsNumberOrElse(1.0).floatValue();
+		float attackDamage = KdlHelper.getArg(attackDamageNode, 0, 1.0f);
 		KDLNode attackSpeedNode = nodes.get("attackSpeed");
 		if (attackSpeedNode == null) throw new ParseException(id, "No attackSpeed specified");
-		float attackSpeed = attackSpeedNode.getArgs().get(0).getAsNumberOrElse(1.0).floatValue();
+		float attackSpeed = KdlHelper.getArg(attackSpeedNode, 0, 1.0f);
 		return creator.create(mat, attackDamage, attackSpeed, settings);
 	}
 

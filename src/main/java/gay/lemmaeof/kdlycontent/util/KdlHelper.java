@@ -2,7 +2,6 @@ package gay.lemmaeof.kdlycontent.util;
 
 import dev.hbeck.kdl.objects.KDLNode;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,41 @@ public class KdlHelper {
 		return defaultValue;
 	}
 
-	@Nullable
+	public static String getProp(KDLNode node, String property, String defaultValue) {
+		if (node.getProps().containsKey(property)) {
+			return node.getProps().get(property).getAsString().getValue();
+		}
+		return defaultValue;
+	}
+
+	public static float getArg(KDLNode node, int index, float defaultValue) {
+		if (node.getArgs().size() > index) {
+			return node.getArgs().get(index).getAsNumberOrElse(defaultValue).floatValue();
+		}
+		return defaultValue;
+	}
+
+	public static boolean getArg(KDLNode node, int index, boolean defaultValue) {
+		if (node.getArgs().size() > index) {
+			return node.getArgs().get(index).getAsBooleanOrElse(defaultValue);
+		}
+		return defaultValue;
+	}
+
+	public static int getArg(KDLNode node, int index, int defaultValue) {
+		if (node.getArgs().size() > index) {
+			return node.getArgs().get(index).getAsNumberOrElse(defaultValue).intValue();
+		}
+		return defaultValue;
+	}
+
+	public static String getArg(KDLNode node, int index, String defaultValue) {
+		if (node.getArgs().size() > index) {
+			return node.getArgs().get(index).getAsString().getValue();
+		}
+		return defaultValue;
+	}
+
 	public static KDLNode getChild(List<KDLNode> nodes, String name) {
 		KDLNode ret = null;
 		for (KDLNode node : nodes) {

@@ -24,7 +24,7 @@ public class SettingsParsing {
 		//TODO: custom sound groups(?)
 		QuiltBlockSettings settings;
 		if (parent.getProps().containsKey("copy")) {
-			settings = QuiltBlockSettings.copyOf(Registries.BLOCK.get(new Identifier(parent.getProps().get("copy").getAsString().getValue())));
+			settings = QuiltBlockSettings.copyOf(Registries.BLOCK.get(new Identifier(KdlHelper.getProp(parent, "copy", ""))));
 		} else {
 			settings = QuiltBlockSettings.create();
 		}
@@ -32,42 +32,42 @@ public class SettingsParsing {
 			switch (node.getIdentifier()) {
 				case "noCollision" -> settings.noCollision();
 				case "nonOpaque" -> settings.nonOpaque();
-				case "slipperiness" -> settings.slipperiness(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
-				case "velocityMultiplier" -> settings.velocityMultiplier(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
-				case "jumpVelocityMultiplier" -> settings.jumpVelocityMultiplier(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
-				case "sounds" -> settings.sounds(NamedProperties.SOUND_GROUPS.get(node.getArgs().get(0).getAsString().getValue()));
-				case "luminance" -> settings.luminance(node.getArgs().get(0).getAsNumberOrElse(0).intValue());
+				case "slipperiness" -> settings.slipperiness(KdlHelper.getArg(node, 0, 0f));
+				case "velocityMultiplier" -> settings.velocityMultiplier(KdlHelper.getArg(node, 0, 0f));
+				case "jumpVelocityMultiplier" -> settings.jumpVelocityMultiplier(KdlHelper.getArg(node, 0, 0f));
+				case "sounds" -> settings.sounds(NamedProperties.SOUND_GROUPS.get(KdlHelper.getArg(node, 0, "wood")));
+				case "luminance" -> settings.luminance(KdlHelper.getArg(node, 0, 0));
 				case "strength" -> {
 					if (node.getArgs().size() == 1) {
-						settings.strength(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
+						settings.strength(KdlHelper.getArg(node, 0, 0f));
 					} else {
-						settings.strength(node.getArgs().get(0).getAsNumberOrElse(0).floatValue(), node.getArgs().get(1).getAsNumberOrElse(0).floatValue());
+						settings.strength(KdlHelper.getArg(node, 0, 0f), KdlHelper.getArg(node, 1, 0f));
 					}
 				}
 				case "breakInstantly" -> settings.breakInstantly();
-				case "ticksRandomly" -> settings.ticksRandomly(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "dynamicBounds" -> settings.dynamicBounds(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "ticksRandomly" -> settings.ticksRandomly(KdlHelper.getArg(node, 0, true));
+				case "dynamicBounds" -> settings.dynamicBounds(KdlHelper.getArg(node, 0, true));
 				case "dropsNothing" -> settings.dropsNothing();
-				case "dropsLike" -> settings.dropsLike(Registries.BLOCK.get(new Identifier(node.getArgs().get(0).getAsString().getValue())));
-				case "drops" -> settings.drops(new Identifier(node.getArgs().get(0).getAsString().getValue()));
-				case "lavaIgnitable" -> settings.lavaIgnitable(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "liquid" -> settings.liquid(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "solid" -> settings.solid(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "nonSolid" -> settings.nonSolid(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "air" -> settings.air(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "dropsLike" -> settings.dropsLike(Registries.BLOCK.get(new Identifier(KdlHelper.getArg(node, 0, "minecraft:air"))));
+				case "drops" -> settings.drops(new Identifier(KdlHelper.getArg(node, 0, "minecraft:blocks/air")));
+				case "lavaIgnitable" -> settings.lavaIgnitable(KdlHelper.getArg(node, 0, true));
+				case "liquid" -> settings.liquid(KdlHelper.getArg(node, 0, true));
+				case "solid" -> settings.solid(KdlHelper.getArg(node, 0, true));
+				case "nonSolid" -> settings.nonSolid(KdlHelper.getArg(node, 0, true));
+				case "air" -> settings.air(KdlHelper.getArg(node, 0, true));
 				//dynamic luminance, allow spawning, solid block, suffocates, blocks vision, post process, and emmissive lighting too complex to model with kdl for now
-				case "requiresTool" -> settings.requiresTool(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "pistonBehavior" -> settings.pistonBehavior(NamedProperties.PISTON_BEHAVIORS.get(node.getArgs().get(0).getAsString().getValue()));
-				case "offsetType" -> settings.offsetType(NamedProperties.OFFSET_TYPES.get(node.getArgs().get(0).getAsString().getValue()));
+				case "requiresTool" -> settings.requiresTool(KdlHelper.getArg(node, 0, true));
+				case "pistonBehavior" -> settings.pistonBehavior(NamedProperties.PISTON_BEHAVIORS.get(KdlHelper.getArg(node, 0, "push")));
+				case "offsetType" -> settings.offsetType(NamedProperties.OFFSET_TYPES.get(KdlHelper.getArg(node, 0, "none")));
 				case "disableParticlesOnBreak" -> settings.disableParticlesOnBreak();
 				//feature flags are hardcoded
-				case "instrument" -> settings.instrument(NamedProperties.INSTRUMENTS.get(node.getArgs().get(0).getAsString().getValue()));
-				case "replaceable" -> settings.replaceable(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "opaque" -> settings.opaque(node.getArgs().get(0).getAsBooleanOrElse(true));
-				case "mapColor" -> settings.mapColor(NamedProperties.MAP_COLORS.get(node.getArgs().get(0).getAsString().getValue()));
-				case "hardness" -> settings.hardness(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
-				case "resistance" -> settings.resistance(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
-				case "collidable" -> settings.collidable(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "instrument" -> settings.instrument(NamedProperties.INSTRUMENTS.get(KdlHelper.getArg(node, 0, "harp")));
+				case "replaceable" -> settings.replaceable(KdlHelper.getArg(node, 0, true));
+				case "opaque" -> settings.opaque(KdlHelper.getArg(node, 0, true));
+				case "mapColor" -> settings.mapColor(NamedProperties.MAP_COLORS.get(KdlHelper.getArg(node, 0, "none")));
+				case "hardness" -> settings.hardness(KdlHelper.getArg(node, 0, 0f));
+				case "resistance" -> settings.resistance(KdlHelper.getArg(node, 0, 0f));
+				case "collidable" -> settings.collidable(KdlHelper.getArg(node, 0, true));
 				default -> KdlyContent.LOGGER.info("Unknown node type {} in kdl for block {}", node.getIdentifier(), id);
 			}
 		}
@@ -78,12 +78,12 @@ public class SettingsParsing {
 		QuiltItemSettings settings = new QuiltItemSettings();
 		for (KDLNode node : parent.getChild().orElse(new KDLDocument.Builder().build()).getNodes()) {
 			switch (node.getIdentifier()) {
-				case "maxCount" -> settings.maxCount(node.getArgs().get(0).getAsNumberOrElse(0).intValue());
-				case "maxDamage" -> settings.maxDamage(node.getArgs().get(0).getAsNumberOrElse(0).intValue());
+				case "maxCount" -> settings.maxCount(KdlHelper.getArg(node, 0, 0));
+				case "maxDamage" -> settings.maxDamage(KdlHelper.getArg(node, 0, 0));
 				case "recipeRemainder" ->
-						settings.recipeRemainder(Registries.ITEM.get(new Identifier(node.getArgs().get(0).getAsString().getValue())));
+						settings.recipeRemainder(Registries.ITEM.get(new Identifier(KdlHelper.getArg(node, 0, "air"))));
 				case "rarity" -> {
-					String rarity = node.getArgs().get(0).getAsString().getValue();
+					String rarity = KdlHelper.getArg(node, 0, "common");
 					settings.rarity(switch(rarity) {
 						case "common" -> Rarity.COMMON;
 						case "uncommon" -> Rarity.UNCOMMON;
@@ -96,7 +96,7 @@ public class SettingsParsing {
 				case "food" ->
 						settings.food(getFoodComponent(id, node.getChild().orElse(new KDLDocument(new ArrayList<>())).getNodes()));
 				case "equipmentSlot" -> {
-					String slot = node.getArgs().get(0).getAsString().getValue();
+					String slot = KdlHelper.getArg(node, 0, "");
 					settings.equipmentSlot(switch(slot) {
 						case "head" -> EquipmentSlot.HEAD;
 						case "chest" -> EquipmentSlot.CHEST;
@@ -115,13 +115,13 @@ public class SettingsParsing {
 		FoodComponent.Builder builder = new FoodComponent.Builder();
 		for (KDLNode node : config) {
 			switch (node.getIdentifier()) {
-				case "hunger" -> builder.hunger(node.getArgs().get(0).getAsNumberOrElse(0).intValue());
-				case "saturation" -> builder.saturationModifier(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
+				case "hunger" -> builder.hunger(KdlHelper.getArg(node, 0, 0));
+				case "saturation" -> builder.saturationModifier(KdlHelper.getArg(node, 0, 0f));
 				case "meat" -> builder.meat();
 				case "alwaysEdible" -> builder.alwaysEdible();
 				case "snack" -> builder.snack();
 				case "statusEffect" -> {
-					Identifier effId = new Identifier(node.getArgs().get(0).getAsString().getValue());
+					Identifier effId = new Identifier(KdlHelper.getArg(node, 0, ""));
 					StatusEffect eff = Registries.STATUS_EFFECT.get(effId);
 					if (eff == null) throw new ParseException(id, "Unknown status effect " + effId);
 					float chance = KdlHelper.getProp(node, "chance", 1f);

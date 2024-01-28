@@ -51,9 +51,9 @@ public class CustomBlockGenerator implements BlockGenerator {
 			if (propNodes.containsKey("rotation")) {
 				KDLNode rotNode = propNodes.get("rotation");
 				try {
-					rotationProp = CustomBlock.RotationProperty.forName(rotNode.getProps().get("type").getAsString().getValue());
+					rotationProp = CustomBlock.RotationProperty.forName(KdlHelper.getProp(rotNode, "type", "facing"));
 					if (rotNode.getProps().containsKey("placement")) {
-						placementRule = CustomBlock.PlacementRule.forName(rotNode.getProps().get("placement").getAsString().getValue());
+						placementRule = CustomBlock.PlacementRule.forName(KdlHelper.getProp(rotNode, "placement", "side"));
 					}
 				} catch (IllegalArgumentException e) {
 					throw new ParseException(id, e.getMessage());
@@ -82,7 +82,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 				KDLNode node = funcNodes.get(str);
 				try {
 					CustomBlock.FunctionPoint point = CustomBlock.FunctionPoint.forName(str);
-					functions.put(point, new Identifier(node.getArgs().get(0).getAsString().getValue()));
+					functions.put(point, new Identifier(KdlHelper.getArg(node, 0, "")));
 				} catch (IllegalArgumentException e) {
 					throw new ParseException(id, e.getMessage());
 				}

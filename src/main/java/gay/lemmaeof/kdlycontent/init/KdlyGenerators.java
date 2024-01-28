@@ -28,7 +28,7 @@ public class KdlyGenerators {
 	public static final BlockGenerator STAIRS = registerBlockGen("stair", (id, settings, customConfig) -> {
 		KDLNode node = KdlHelper.getChild(customConfig, "parent");
 		if (node != null) {
-			Block parent = Registries.BLOCK.get(new Identifier(node.getArgs().get(0).getAsString().getValue()));
+			Block parent = Registries.BLOCK.get(new Identifier(KdlHelper.getArg(node, 0, "air")));
 			return new StairsBlock(parent.getDefaultState(), settings);
 		}
 		throw new ParseException(id, "No parent block found for stairs");
@@ -48,8 +48,8 @@ public class KdlyGenerators {
 		if (materialNode == null) throw new ParseException(id, "No armor material specified");
 		KDLNode slotNode = KdlHelper.getChild(customConfig, "equipmentSlot");
 		if (slotNode == null) throw new ParseException(id, "No equipmentSlot specified");
-		ArmorMaterial armor = ArmorMaterialContentType.getMaterial(materialNode.getArgs().get(0).getAsString().getValue(), id);
-		String slotName = slotNode.getArgs().get(0).getAsString().getValue();
+		ArmorMaterial armor = ArmorMaterialContentType.getMaterial(KdlHelper.getArg(materialNode, 0, "diamond"), id);
+		String slotName = KdlHelper.getArg(slotNode, 0, "head");
 		ArmorItem.ArmorSlot slot = switch (slotName) {
 			case "head" -> ArmorItem.ArmorSlot.HELMET;
 			case "chest" -> ArmorItem.ArmorSlot.CHESTPLATE;

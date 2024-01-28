@@ -19,6 +19,7 @@
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
+			"init": "gay.lemmaeof.kdlycontent.KdlyContent",
 			"lib39:postinit": "gay.lemmaeof.kdlycontent.KdlyContent",
 			"lib39:postinit_client": "gay.lemmaeof.kdlycontent.client.KdlyContentClient"
 		},

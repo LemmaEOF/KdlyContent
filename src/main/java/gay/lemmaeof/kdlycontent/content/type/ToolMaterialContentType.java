@@ -12,12 +12,12 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Lazy;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class ToolMaterialContentType implements ContentType {
 	public static final Map<Identifier, ToolMaterial> KDLY_TOOL_MATERIALS = new HashMap<>();
@@ -45,11 +45,11 @@ public class ToolMaterialContentType implements ContentType {
 		//fun stuff for ingredients, whee
 		KDLNode repairNode = nodes.get("repairIngredient");
 		if (repairNode == null) throw new ParseException(id, "No repairIngredient specified");
-		Lazy<Ingredient> repairIng;
+		Supplier<Ingredient> repairIng;
 		if (repairNode.getProps().containsKey("tag")) {
-			repairIng = new Lazy<>(() -> Ingredient.ofTag(TagKey.of(Registries.ITEM.getKey(), new Identifier(repairNode.getProps().get("tag").getAsString().getValue()))));
+			repairIng = () -> Ingredient.ofTag(TagKey.of(Registries.ITEM.getKey(), new Identifier(repairNode.getProps().get("tag").getAsString().getValue())));
 		} else {
-			repairIng = new Lazy<>(() -> Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registries.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new)));
+			repairIng = () -> Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registries.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new));
 		}
 
 		ToolMaterial mat = new CustomToolMaterial(durability, miningSpeedMultiplier, attackDamage, miningLevel, enchantability, repairIng);
@@ -96,9 +96,9 @@ public class ToolMaterialContentType implements ContentType {
 		private final float attackDamage;
 		private final int miningLevel;
 		private final int enchantability;
-		private final Lazy<Ingredient> repairIngredient;
+		private final Supplier<Ingredient> repairIngredient;
 
-		private CustomToolMaterial(int durability, float miningSpeedMultiplier, float attackDamage, int miningLevel, int enchantability, Lazy<Ingredient> repairIngredient) {
+		private CustomToolMaterial(int durability, float miningSpeedMultiplier, float attackDamage, int miningLevel, int enchantability, Supplier<Ingredient> repairIngredient) {
 			this.durability = durability;
 			this.miningSpeedMultiplier = miningSpeedMultiplier;
 			this.attackDamage = attackDamage;
