@@ -2,6 +2,7 @@ package gay.lemmaeof.kdlycontent.content.type;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
+import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.util.SettingsParsing;
@@ -9,8 +10,10 @@ import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.ItemGenerator;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
 
 import java.text.MessageFormat;
@@ -18,6 +21,7 @@ import java.util.*;
 
 public class ItemContentType implements ContentType {
 	public static final Map<Identifier, Item> KDLY_ITEMS = new HashMap<>();
+	public static final Map<ItemGroup, List<Item>> KDLY_ITEM_GROUPS = new HashMap<>();
 
 	@Override
 	public void generateFrom(Identifier id, KDLNode parent) {
@@ -27,12 +31,18 @@ public class ItemContentType implements ContentType {
 			throw new ParseException(id, "No item settings node provided");
 		}
 		QuiltItemSettings settings = SettingsParsing.parseItemSettings(id, settingsNode);
+		ItemGroup group = KdlyContent.GROUP;
+		if (nodes.containsKey("group")) {
+			group = Registries.ITEM_GROUP.get(new Identifier(nodes.get("group").getArgs().get(0).getAsString().getValue()));
+		}
 		KDLNode generatorNode = nodes.get("type");
 		String typeName = generatorNode == null? "kdlycontent:standard" : generatorNode.getArgs().get(0).getAsString().getValue();
 		if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
 		List<KDLNode> customConfig = generatorNode == null? Collections.emptyList() : generatorNode.getChild().orElse(KDLDocument.builder().build()).getNodes();
 		ItemGenerator gen = KdlyRegistries.ITEM_GENERATORS.get(new Identifier(typeName));
-		KDLY_ITEMS.put(id, Registry.register(Registry.ITEM, id, gen.generateItem(id, settings, customConfig)));
+		Item item = gen.generateItem(id, settings, customConfig);
+		KDLY_ITEMS.put(id, Registry.register(Registries.ITEM, id, item));
+		KDLY_ITEM_GROUPS.computeIfAbsent(group, g -> new ArrayList<>()).add(item);
 	}
 
 	@Override

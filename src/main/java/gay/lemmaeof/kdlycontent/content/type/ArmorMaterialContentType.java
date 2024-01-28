@@ -1,47 +1,47 @@
 package gay.lemmaeof.kdlycontent.content.type;
 
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.ParseException;
-
-
-import net.minecraft.entity.EquipmentSlot;
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.ArmorMaterials;
 import net.minecraft.item.Item;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Lazy;
-import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.NotNull;
+import org.quiltmc.loader.api.minecraft.ClientOnly;
+import org.quiltmc.qsl.rendering.entity.api.client.QuiltArmorMaterialExtensions;
+
+import java.text.MessageFormat;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class ArmorMaterialContentType implements ContentType {
 	public static final Map<Identifier, ArmorMaterial> KDLY_ARMOR_MATERIALS = new HashMap<>();
 	public static final Map<Identifier, ArmorMaterial> ALL_ARMOR_MATERIALS = new HashMap<>();
 
-	private static final int[] BASE_DURABILITY = new int[]{13, 15, 16, 11};
+	private static final int[] BASE_DURABILITY = new int[]{11, 16, 15, 13};
 
 	@Override
 	public void generateFrom(Identifier id, KDLNode parent) throws ParseException {
 		Map<String, KDLNode> nodes = KdlHelper.mapNodes(parent.getChild().orElse(KDLDocument.builder().build()).getNodes());
-		int[] durability;
+		EnumMap<ArmorItem.ArmorSlot, Integer> durability = new EnumMap<>(ArmorItem.ArmorSlot.class);
 		if (nodes.containsKey("durabilityMultiplier")) {
 			KDLNode node = nodes.get("durabilityMultiplier");
 			int multiplier = node.getArgs().get(0).getAsNumberOrElse(0).intValue();
-			durability = new int[]{
-					multiplier * BASE_DURABILITY[0],
-					multiplier * BASE_DURABILITY[1],
-					multiplier * BASE_DURABILITY[2],
-					multiplier * BASE_DURABILITY[3],
-			};
+			durability.put(ArmorItem.ArmorSlot.HELMET, multiplier * BASE_DURABILITY[0]);
+			durability.put(ArmorItem.ArmorSlot.CHESTPLATE, multiplier * BASE_DURABILITY[1]);
+			durability.put(ArmorItem.ArmorSlot.LEGGINGS, multiplier * BASE_DURABILITY[2]);
+			durability.put(ArmorItem.ArmorSlot.BOOTS, multiplier * BASE_DURABILITY[3]);
 		} else {
 			KDLNode node = nodes.get("durability");
 			if (node == null) throw new ParseException(id, "No durability or durabilityMultiplier specified");
@@ -49,7 +49,7 @@ public class ArmorMaterialContentType implements ContentType {
 		}
 		KDLNode protectionNode = nodes.get("protection");
 		if (protectionNode == null) throw new ParseException(id, "No protection specified");
-		int[] protection = parseSlots(id, protectionNode);
+		EnumMap<ArmorItem.ArmorSlot, Integer> protection = parseSlots(id, protectionNode);
 		KDLNode toughnessNode = nodes.get("toughness");
 		if (toughnessNode == null) throw new ParseException(id, "No toughness specified");
 		float toughness = toughnessNode.getArgs().get(0).getAsNumberOrElse(0).floatValue();
@@ -61,16 +61,16 @@ public class ArmorMaterialContentType implements ContentType {
 		int enchantability = enchantabilityNode.getArgs().get(0).getAsNumberOrElse(0).intValue();
 		KDLNode equipSoundNode = nodes.get("equipSound");
 		if (equipSoundNode == null) throw new ParseException(id, "No equipSound specified");
-		SoundEvent equipSound = Registry.SOUND_EVENT.get(new Identifier(equipSoundNode.getArgs().get(0).getAsString().getValue()));
+		SoundEvent equipSound = Registries.SOUND_EVENT.get(new Identifier(equipSoundNode.getArgs().get(0).getAsString().getValue()));
 
 		//fun stuff for ingredients, whee
 		KDLNode repairNode = nodes.get("repairIngredient");
 		if (repairNode == null) throw new ParseException(id, "No repairIngredient specified");
-		Lazy<Ingredient> repairIng;
+		Supplier<Ingredient> repairIng;
 		if (repairNode.getProps().containsKey("tag")) {
-			repairIng = new Lazy<>(() -> Ingredient.ofTag(TagKey.of(Registry.ITEM_KEY, new Identifier(repairNode.getProps().get("tag").getAsString().getValue()))));
+			repairIng = () -> Ingredient.ofTag(TagKey.of(Registries.ITEM.getKey(), new Identifier(repairNode.getProps().get("tag").getAsString().getValue())));
 		} else {
-			repairIng = new Lazy<>(() -> Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registry.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new)));
+			repairIng = () -> Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registries.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new));
 		}
 
 		ArmorMaterial mat = new CustomArmorMaterial(id, durability, protection, toughness, knockbackResistance, enchantability, equipSound, repairIng);
@@ -85,29 +85,29 @@ public class ArmorMaterialContentType implements ContentType {
 		return Optional.empty();
 	}
 
-	private int[] parseSlots(Identifier id, KDLNode node) throws ParseException {
-		int[] ret = new int[4];
+	private EnumMap<ArmorItem.ArmorSlot, Integer> parseSlots(Identifier id, KDLNode node) throws ParseException {
+		EnumMap<ArmorItem.ArmorSlot, Integer> ret = new EnumMap<>(ArmorItem.ArmorSlot.class);
 		Optional<KDLDocument> childOpt = node.getChild();
 		if (childOpt.isPresent()) {
 			KDLDocument child = childOpt.get();
 			Map<String, KDLNode> nodes = KdlHelper.mapNodes(child.getNodes());
-			KDLNode head = nodes.get("head");
-			if (head == null) throw new ParseException(id, "No head value specified");
-			KDLNode chest = nodes.get("chest");
-			if (chest == null) throw new ParseException(id, "No chest value specified");
-			KDLNode legs = nodes.get("legs");
-			if (legs == null) throw new ParseException(id, "No legs value specified");
-			KDLNode feet = nodes.get("feet");
-			if (feet == null) throw new ParseException(id, "No feet value specified");
-			ret[0] = head.getArgs().get(0).getAsNumberOrElse(0).intValue();
-			ret[1] = chest.getArgs().get(0).getAsNumberOrElse(0).intValue();
-			ret[2] = legs.getArgs().get(0).getAsNumberOrElse(0).intValue();
-			ret[3] = feet.getArgs().get(0).getAsNumberOrElse(0).intValue();
+			KDLNode head = nodes.get("helmet");
+			if (head == null) throw new ParseException(id, "No helmet value specified");
+			KDLNode chest = nodes.get("chestplate");
+			if (chest == null) throw new ParseException(id, "No chestplate value specified");
+			KDLNode legs = nodes.get("leggings");
+			if (legs == null) throw new ParseException(id, "No leggings value specified");
+			KDLNode feet = nodes.get("boots");
+			if (feet == null) throw new ParseException(id, "No boots value specified");
+			ret.put(ArmorItem.ArmorSlot.HELMET, head.getArgs().get(0).getAsNumberOrElse(0).intValue());
+			ret.put(ArmorItem.ArmorSlot.CHESTPLATE, chest.getArgs().get(0).getAsNumberOrElse(0).intValue());
+			ret.put(ArmorItem.ArmorSlot.LEGGINGS, legs.getArgs().get(0).getAsNumberOrElse(0).intValue());
+			ret.put(ArmorItem.ArmorSlot.BOOTS, feet.getArgs().get(0).getAsNumberOrElse(0).intValue());
 		} else {
-			ret[0] = KdlHelper.getProp(node, "head", 0);
-			ret[1] = KdlHelper.getProp(node, "chest", 0);
-			ret[2] = KdlHelper.getProp(node, "legs", 0);
-			ret[3] = KdlHelper.getProp(node, "feet", 0);
+			ret.put(ArmorItem.ArmorSlot.HELMET, KdlHelper.getProp(node, "helmet", 0));
+			ret.put(ArmorItem.ArmorSlot.CHESTPLATE, KdlHelper.getProp(node, "chestplate", 0));
+			ret.put(ArmorItem.ArmorSlot.LEGGINGS, KdlHelper.getProp(node, "leggings", 0));
+			ret.put(ArmorItem.ArmorSlot.BOOTS, KdlHelper.getProp(node, "boots", 0));
 		}
 		return ret;
 	}
@@ -135,19 +135,19 @@ public class ArmorMaterialContentType implements ContentType {
 		}
 	}
 
-	public static class CustomArmorMaterial implements ArmorMaterial {
+	public static class CustomArmorMaterial implements ArmorMaterial, QuiltArmorMaterialExtensions {
 		private final Identifier id;
-		private final int[] durability;
-		private final int[] protection;
+		private final EnumMap<ArmorItem.ArmorSlot, Integer> durability;
+		private final EnumMap<ArmorItem.ArmorSlot, Integer> protection;
 		private final float toughness;
 		private final float knockbackResistance;
 		private final int enchantability;
 		private final SoundEvent equipSound;
-		private final Lazy<Ingredient> repairIngredient;
+		private final Supplier<Ingredient> repairIngredient;
 
-		public CustomArmorMaterial(Identifier id, int[] durability, int[] protection, float toughness,
+		public CustomArmorMaterial(Identifier id, EnumMap<ArmorItem.ArmorSlot, Integer> durability, EnumMap<ArmorItem.ArmorSlot, Integer> protection, float toughness,
 								   float knockbackResistance, int enchantability, SoundEvent equipSound,
-								   Lazy<Ingredient> repairIngredient) {
+								   Supplier<Ingredient> repairIngredient) {
 			this.id = id;
 			this.durability = durability;
 			this.protection = protection;
@@ -159,13 +159,13 @@ public class ArmorMaterialContentType implements ContentType {
 		}
 
 		@Override
-		public int getDurability(EquipmentSlot slot) {
-			return durability[slot.getEntitySlotId()];
+		public int getDurability(ArmorItem.ArmorSlot slot) {
+			return durability.get(slot);
 		}
 
 		@Override
-		public int getProtectionAmount(EquipmentSlot slot) {
-			return protection[slot.getEntitySlotId()];
+		public int getProtection(ArmorItem.ArmorSlot slot) {
+			return protection.get(slot);
 		}
 
 		@Override
@@ -193,13 +193,14 @@ public class ArmorMaterialContentType implements ContentType {
 			return repairIngredient.get();
 		}
 
-		public String getNamespace() {
-			return id.getNamespace();
-		}
-
 		@Override
 		public String getName() {
 			return id.getPath();
+		}
+
+		@Override
+		public @ClientOnly @NotNull Identifier getTexture() {
+			return id;
 		}
 	}
 }

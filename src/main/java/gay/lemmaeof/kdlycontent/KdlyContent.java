@@ -5,24 +5,35 @@ import com.unascribed.lib39.core.api.ModPostInitializer;
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
 import dev.hbeck.kdl.parse.KDLParser;
+import gay.debuggy.staticdata.api.StaticData;
+import gay.debuggy.staticdata.api.StaticDataItem;
+import gay.debuggy.staticdata.impl.StaticDataImpl;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.content.ContentItem;
 import gay.lemmaeof.kdlycontent.content.ContentLoading;
+import gay.lemmaeof.kdlycontent.content.type.ItemContentType;
 import gay.lemmaeof.kdlycontent.init.KdlyContentTypes;
 import gay.lemmaeof.kdlycontent.init.KdlyGenerators;
-import net.minecraft.item.*;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.loader.api.QuiltLoader;
-import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
-import org.quiltmc.qsl.item.group.api.QuiltItemGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class KdlyContent implements ModPostInitializer {
 	public static final String MODID = "kdlycontent";
@@ -30,21 +41,26 @@ public class KdlyContent implements ModPostInitializer {
 
 	private static final KDLParser parser = new KDLParser();
 
-	public static final ItemGroup GROUP = QuiltItemGroup.createWithIcon(new Identifier("kdlycontent", "generated"), () -> new ItemStack(Items.CRAFTING_TABLE));
+	public static final ItemGroup GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier(MODID, "generated"),
+			FabricItemGroup.builder()
+					.icon(() -> new ItemStack(Items.CRAFTING_TABLE))
+					.build()
+	);
 
 	@Override
 	public void onPostInitialize() {
 		KdlyContentTypes.init();
 		KdlyGenerators.init();
 		QuiltLoader.getEntrypoints("kdlycontent:before", Runnable.class).forEach(Runnable::run);
-		ImmutableSet<ContentItem> data = ContentLoading.getAll("kdlycontent.kdl");
-		for (ContentItem item : data) {
-			String namespace = item.getIdentifier().getNamespace();
+//		ImmutableSet<ContentItem> data = ContentLoading.getAll("kdlycontent.kdl");
+		List<StaticDataItem> data = StaticData.getExactData(new Identifier("", "kdlycontent.kdl"));
+		for (StaticDataItem item : data) {
+			String namespace = item.getModId();
 			try {
-				KDLDocument kdl = parser.parse(item.createInputStream());
+				KDLDocument kdl = parser.parse(item.getAsStream());
 				parseKdl(namespace, kdl);
 			} catch (IOException | ParseException e) {
-				throw new RuntimeException("Could not load KDL for file " + item.getIdentifier(), e);
+				throw new RuntimeException("Could not load KDL for file " + item.getResourceId(), e);
 			}
 		}
 		StringBuilder builder = new StringBuilder("Registered ");
@@ -58,6 +74,11 @@ public class KdlyContent implements ModPostInitializer {
 			builder.append("and ").append(messages.get(messages.size() - 1));
 		}
 		LOGGER.info(builder.toString());
+		ItemGroupEvents.MODIFY_ENTRIES_ALL.register((group, entries) -> {
+			for (Item item : ItemContentType.KDLY_ITEM_GROUPS.get(group)) {
+				entries.addItem(item);
+			}
+		});
 		QuiltLoader.getEntrypoints("kdlycontent:after", Runnable.class).forEach(Runnable::run);
 	}
 

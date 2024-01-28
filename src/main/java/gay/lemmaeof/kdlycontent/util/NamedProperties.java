@@ -1,7 +1,8 @@
 package gay.lemmaeof.kdlycontent.util;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.MapColor;
-import net.minecraft.block.Material;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.sound.BlockSoundGroup;
 
@@ -10,65 +11,15 @@ import java.util.Map;
 
 public class NamedProperties {
 
-	public static final Map<String, Material> MATERIALS = new HashMap<>();
 	public static final Map<String, BlockSoundGroup> SOUND_GROUPS = new HashMap<>();
 	public static final Map<String, MapColor> MAP_COLORS = new HashMap<>();
 	public static final Map<String, PistonBehavior> PISTON_BEHAVIORS = new HashMap<>();
+	public static final Map<String, AbstractBlock.OffsetType> OFFSET_TYPES = new HashMap<>();
+	public static final Map<String, NoteBlockInstrument> INSTRUMENTS = new HashMap<>();
 
 	static {
 		//if you appreciate the work I've put in transcribing all of this *by hand*,
 		//please support me on ko-fi! https://ko-fi.com/LemmaEOF
-
-		//Materials
-		MATERIALS.put("air", Material.AIR);
-		MATERIALS.put("structure_void", Material.STRUCTURE_VOID);
-		MATERIALS.put("portal", Material.PORTAL);
-		MATERIALS.put("carpet", Material.CARPET);
-		MATERIALS.put("plant", Material.PLANT);
-		MATERIALS.put("underwater_plant", Material.UNDERWATER_PLANT);
-		MATERIALS.put("replaceable_plant", Material.REPLACEABLE_PLANT);
-		MATERIALS.put("nether_shoots", Material.NETHER_SHOOTS);
-		MATERIALS.put("replaceable_underwater_plant", Material.REPLACEABLE_UNDERWATER_PLANT);
-		MATERIALS.put("water", Material.WATER);
-		MATERIALS.put("bubble_column", Material.BUBBLE_COLUMN);
-		MATERIALS.put("lava", Material.LAVA);
-		MATERIALS.put("snow_layer", Material.SNOW_LAYER);
-		MATERIALS.put("fire", Material.FIRE);
-		MATERIALS.put("decoration", Material.DECORATION);
-		MATERIALS.put("cobweb", Material.COBWEB);
-		MATERIALS.put("sculk", Material.SCULK);
-		MATERIALS.put("redstone_lamp", Material.REDSTONE_LAMP);
-		MATERIALS.put("organic_product", Material.ORGANIC_PRODUCT);
-		MATERIALS.put("soil", Material.SOIL);
-		MATERIALS.put("solid_organic", Material.SOLID_ORGANIC);
-		MATERIALS.put("dense_ice", Material.DENSE_ICE);
-		MATERIALS.put("aggregate", Material.AGGREGATE);
-		MATERIALS.put("sponge", Material.SPONGE);
-		MATERIALS.put("shulker_box", Material.SHULKER_BOX);
-		MATERIALS.put("wood", Material.WOOD);
-		MATERIALS.put("nether_wood", Material.NETHER_WOOD);
-		MATERIALS.put("bamboo_sapling", Material.BAMBOO_SAPLING);
-		MATERIALS.put("bamboo", Material.BAMBOO);
-		MATERIALS.put("wool", Material.WOOL);
-		MATERIALS.put("tnt", Material.TNT);
-		MATERIALS.put("leaves", Material.LEAVES);
-		MATERIALS.put("glass", Material.GLASS);
-		MATERIALS.put("ice", Material.ICE);
-		MATERIALS.put("cactus", Material.CACTUS);
-		MATERIALS.put("stone", Material.STONE);
-		MATERIALS.put("metal", Material.METAL);
-		MATERIALS.put("snow_block", Material.SNOW_BLOCK);
-		MATERIALS.put("repair_station", Material.REPAIR_STATION);
-		MATERIALS.put("barrier", Material.BARRIER);
-		MATERIALS.put("piston", Material.PISTON);
-		MATERIALS.put("moss_block", Material.MOSS_BLOCK);
-		MATERIALS.put("gourd", Material.GOURD);
-		MATERIALS.put("egg", Material.EGG);
-		MATERIALS.put("cake", Material.CAKE);
-		MATERIALS.put("amethyst", Material.AMETHYST);
-		MATERIALS.put("powder_snow", Material.POWDER_SNOW);
-		MATERIALS.put("frog_spawn", Material.FROG_SPAWN);
-		MATERIALS.put("froglight", Material.FROGLIGHT);
 
 		//Block sound groups
 		SOUND_GROUPS.put("wood", BlockSoundGroup.WOOD);
@@ -103,7 +54,7 @@ public class NamedProperties {
 		SOUND_GROUPS.put("roots", BlockSoundGroup.ROOTS);
 		SOUND_GROUPS.put("shroomlight", BlockSoundGroup.SHROOMLIGHT);
 		SOUND_GROUPS.put("weeping_vines", BlockSoundGroup.WEEPING_VINES);
-		SOUND_GROUPS.put("weeping_vines_low_pitch", BlockSoundGroup.WEEPING_VINES_LOW_PITCH); //uh
+		SOUND_GROUPS.put("low_pitch_weeping_vines", BlockSoundGroup.LOW_PITCH_WEEPING_VINES); //uh
 		SOUND_GROUPS.put("soul_sand", BlockSoundGroup.SOUL_SAND);
 		SOUND_GROUPS.put("soul_soil", BlockSoundGroup.SOUL_SOIL);
 		SOUND_GROUPS.put("basalt", BlockSoundGroup.BASALT);
@@ -160,21 +111,22 @@ public class NamedProperties {
 		SOUND_GROUPS.put("packed_mud", BlockSoundGroup.PACKED_MUD);
 
 		//Map colors
-		MAP_COLORS.put("clear", MapColor.CLEAR);
-		MAP_COLORS.put("pale_green", MapColor.PALE_GREEN);
-		MAP_COLORS.put("pale_yellow", MapColor.PALE_YELLOW);
-		MAP_COLORS.put("white_gray", MapColor.WHITE);
-		MAP_COLORS.put("bright_red", MapColor.BRIGHT_RED);
-		MAP_COLORS.put("pale_purple", MapColor.PALE_PURPLE);
-		MAP_COLORS.put("iron_gray", MapColor.IRON_GRAY);
-		MAP_COLORS.put("dark_green", MapColor.DARK_GREEN);
-		MAP_COLORS.put("white", MapColor.WHITE);
-		MAP_COLORS.put("light_blue_gray", MapColor.LIGHT_BLUE_GRAY);
-		MAP_COLORS.put("dirt_brown", MapColor.DIRT_BROWN);
-		MAP_COLORS.put("stone_gray", MapColor.STONE_GRAY);
-		MAP_COLORS.put("water_blue", MapColor.WATER_BLUE);
-		MAP_COLORS.put("oak_tan", MapColor.OAK_TAN);
-		MAP_COLORS.put("off_white", MapColor.OFF_WHITE);
+		MAP_COLORS.put("clear", MapColor.NONE);
+		MAP_COLORS.put("grass", MapColor.GRASS);
+		MAP_COLORS.put("sand", MapColor.SAND);
+		MAP_COLORS.put("wool", MapColor.WOOL);
+		MAP_COLORS.put("fire", MapColor.FIRE);
+		MAP_COLORS.put("ice", MapColor.ICE);
+		MAP_COLORS.put("metal", MapColor.METAL);
+		MAP_COLORS.put("plant", MapColor.PLANT);
+		MAP_COLORS.put("snow", MapColor.SNOW);
+		MAP_COLORS.put("clay", MapColor.CLAY);
+		MAP_COLORS.put("dirt", MapColor.DIRT);
+		MAP_COLORS.put("stone", MapColor.STONE);
+		MAP_COLORS.put("water", MapColor.WATER);
+		MAP_COLORS.put("wood", MapColor.WOOD);
+		MAP_COLORS.put("quartz", MapColor.QUARTZ);
+		MAP_COLORS.put("white", MapColor.WOOL); //fuck you it's white
 		MAP_COLORS.put("orange", MapColor.ORANGE);
 		MAP_COLORS.put("magenta", MapColor.MAGENTA);
 		MAP_COLORS.put("light_blue", MapColor.LIGHT_BLUE);
@@ -191,42 +143,56 @@ public class NamedProperties {
 		MAP_COLORS.put("red", MapColor.RED);
 		MAP_COLORS.put("black", MapColor.BLACK);
 		MAP_COLORS.put("gold", MapColor.GOLD);
-		MAP_COLORS.put("diamond_blue", MapColor.DIAMOND_BLUE);
-		MAP_COLORS.put("lapis_blue", MapColor.LAPIS_BLUE);
-		MAP_COLORS.put("emerald_green", MapColor.EMERALD_GREEN);
-		MAP_COLORS.put("spruce_brown", MapColor.SPRUCE_BROWN);
-		MAP_COLORS.put("dark_red", MapColor.DARK_RED);
-		MAP_COLORS.put("terracotta_white", MapColor.TERRACOTTA_WHITE);
-		MAP_COLORS.put("terracotta_orange", MapColor.TERRACOTTA_ORANGE);
-		MAP_COLORS.put("terracotta_magenta", MapColor.TERRACOTTA_MAGENTA);
-		MAP_COLORS.put("terracotta_light_blue", MapColor.TERRACOTTA_LIGHT_BLUE);
-		MAP_COLORS.put("terracotta_yellow", MapColor.TERRACOTTA_YELLOW);
-		MAP_COLORS.put("terracotta_lime", MapColor.TERRACOTTA_LIME);
-		MAP_COLORS.put("terracotta_pink", MapColor.TERRACOTTA_PINK);
-		MAP_COLORS.put("terracotta_gray", MapColor.TERRACOTTA_GRAY);
-		MAP_COLORS.put("terracotta_light_gray", MapColor.TERRACOTTA_LIGHT_GRAY);
-		MAP_COLORS.put("terracotta_cyan", MapColor.TERRACOTTA_CYAN);
-		MAP_COLORS.put("terracotta_purple", MapColor.TERRACOTTA_PURPLE);
-		MAP_COLORS.put("terracotta_blue", MapColor.TERRACOTTA_BLUE);
-		MAP_COLORS.put("terracotta_brown", MapColor.TERRACOTTA_BROWN);
-		MAP_COLORS.put("terracotta_green", MapColor.TERRACOTTA_GREEN);
-		MAP_COLORS.put("terracotta_red", MapColor.TERRACOTTA_RED);
-		MAP_COLORS.put("terracotta_black", MapColor.TERRACOTTA_BLACK);
-		MAP_COLORS.put("dull_red", MapColor.DULL_RED);
-		MAP_COLORS.put("dull_pink", MapColor.DULL_PINK);
-		MAP_COLORS.put("dark_crimson", MapColor.DARK_CRIMSON);
-		MAP_COLORS.put("teal", MapColor.TEAL);
-		MAP_COLORS.put("dark_aqua", MapColor.DARK_AQUA);
-		MAP_COLORS.put("dark_dull_pink", MapColor.DARK_DULL_PINK);
-		MAP_COLORS.put("bright_teal", MapColor.BRIGHT_TEAL);
-		MAP_COLORS.put("deepslate_gray", MapColor.DEEPSLATE_GRAY);
-		MAP_COLORS.put("raw_iron_pink", MapColor.RAW_IRON_PINK);
-		MAP_COLORS.put("lichen_green", MapColor.LICHEN_GREEN);
+		MAP_COLORS.put("diamond", MapColor.DIAMOND);
+		MAP_COLORS.put("lapis", MapColor.LAPIS);
+		MAP_COLORS.put("emerald", MapColor.EMERALD);
+		MAP_COLORS.put("podzol", MapColor.PODZOL);
+		MAP_COLORS.put("nether", MapColor.NETHER);
+		MAP_COLORS.put("white_terracotta", MapColor.WHITE_TERRACOTTA);
+		MAP_COLORS.put("orange_terracotta", MapColor.ORANGE_TERRACOTTA);
+		MAP_COLORS.put("magenta_terracotta", MapColor.MAGENTA_TERRACOTTA);
+		MAP_COLORS.put("light_blue_terracotta", MapColor.LIGHT_BLUE_TERRACOTTA);
+		MAP_COLORS.put("yellow_terracotta", MapColor.YELLOW_TERRACOTTA);
+		MAP_COLORS.put("lime_terracotta", MapColor.LIME_TERRACOTTA);
+		MAP_COLORS.put("pink_terracotta", MapColor.PINK_TERRACOTTA);
+		MAP_COLORS.put("gray_terracotta", MapColor.GRAY_TERRACOTTA);
+		MAP_COLORS.put("light_gray_terracotta", MapColor.LIGHT_GRAY_TERRACOTTA);
+		MAP_COLORS.put("cyan_terracotta", MapColor.CYAN_TERRACOTTA);
+		MAP_COLORS.put("purple_terracotta", MapColor.PURPLE_TERRACOTTA);
+		MAP_COLORS.put("blue_terracotta", MapColor.BLUE_TERRACOTTA);
+		MAP_COLORS.put("brown_terracotta", MapColor.BROWN_TERRACOTTA);
+		MAP_COLORS.put("green_terracotta", MapColor.GREEN_TERRACOTTA);
+		MAP_COLORS.put("red_terracotta", MapColor.RED_TERRACOTTA);
+		MAP_COLORS.put("black_terracotta", MapColor.BLACK_TERRACOTTA);
+		MAP_COLORS.put("crimson_nylium", MapColor.CRIMSON_NYLIUM);
+		MAP_COLORS.put("crimson_stem", MapColor.CRIMSON_STEM);
+		MAP_COLORS.put("crimson_hyphae", MapColor.CRIMSON_HYPHAE);
+		MAP_COLORS.put("warped_nylium", MapColor.WARPED_NYLIUM);
+		MAP_COLORS.put("warped_stem", MapColor.WARPED_STEM);
+		MAP_COLORS.put("warped_hyphae", MapColor.WARPED_HYPHAE);
+		MAP_COLORS.put("warped_wart_block", MapColor.WARPED_WART_BLOCK);
+		MAP_COLORS.put("deepslate", MapColor.DEEPSLATE);
+		MAP_COLORS.put("raw_iron", MapColor.RAW_IRON);
+		MAP_COLORS.put("glow_lichen", MapColor.GLOW_LICHEN);
 
 		//Piston behaviors
 		PISTON_BEHAVIORS.put("push", PistonBehavior.NORMAL);
 		PISTON_BEHAVIORS.put("destroy", PistonBehavior.DESTROY);
 		PISTON_BEHAVIORS.put("block", PistonBehavior.BLOCK);
 		PISTON_BEHAVIORS.put("push_only", PistonBehavior.PUSH_ONLY);
+
+		//Offset types
+		OFFSET_TYPES.put("none", AbstractBlock.OffsetType.NONE);
+		OFFSET_TYPES.put("xz", AbstractBlock.OffsetType.XZ);
+		OFFSET_TYPES.put("xyz", AbstractBlock.OffsetType.XYZ);
+
+		//Instruments
+		/*
+		harp, basedrum, snare, hat, bass, flute, bell, guitar, chime, xylophone, iron_xylophone, cow_bell, digeridoo,
+		bit, banjo, pling, zombie, skeleton, creeper, dragon, wither_skeleton, piglin, custom_head
+		 */
+		for (NoteBlockInstrument inst : NoteBlockInstrument.values()) {
+			INSTRUMENTS.put(inst.asString(), inst);
+		}
 	}
 }

@@ -1,24 +1,26 @@
 package gay.lemmaeof.kdlycontent.init;
 
 import dev.hbeck.kdl.objects.KDLNode;
-import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.KdlyContent;
-import gay.lemmaeof.kdlycontent.util.KdlyTools;
-import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ItemGenerator;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
+import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.content.custom.CustomBlockGenerator;
 import gay.lemmaeof.kdlycontent.content.type.ArmorMaterialContentType;
-
+import gay.lemmaeof.kdlycontent.util.KdlHelper;
+import gay.lemmaeof.kdlycontent.util.KdlyTools;
 import net.minecraft.block.Block;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.WallBlock;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.*;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ArmorMaterial;
+import net.minecraft.item.Item;
+import net.minecraft.item.ShovelItem;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class KdlyGenerators {
 	public static final BlockGenerator STANDARD_BLOCK = registerBlockGen("standard", (id, settings, customConfig) -> new Block(settings));
@@ -26,7 +28,7 @@ public class KdlyGenerators {
 	public static final BlockGenerator STAIRS = registerBlockGen("stair", (id, settings, customConfig) -> {
 		KDLNode node = KdlHelper.getChild(customConfig, "parent");
 		if (node != null) {
-			Block parent = Registry.BLOCK.get(new Identifier(node.getArgs().get(0).getAsString().getValue()));
+			Block parent = Registries.BLOCK.get(new Identifier(node.getArgs().get(0).getAsString().getValue()));
 			return new StairsBlock(parent.getDefaultState(), settings);
 		}
 		throw new ParseException(id, "No parent block found for stairs");
@@ -48,11 +50,11 @@ public class KdlyGenerators {
 		if (slotNode == null) throw new ParseException(id, "No equipmentSlot specified");
 		ArmorMaterial armor = ArmorMaterialContentType.getMaterial(materialNode.getArgs().get(0).getAsString().getValue(), id);
 		String slotName = slotNode.getArgs().get(0).getAsString().getValue();
-		EquipmentSlot slot = switch (slotName) {
-			case "head" -> EquipmentSlot.HEAD;
-			case "chest" -> EquipmentSlot.CHEST;
-			case "legs" -> EquipmentSlot.LEGS;
-			case "feet" -> EquipmentSlot.FEET;
+		ArmorItem.ArmorSlot slot = switch (slotName) {
+			case "head" -> ArmorItem.ArmorSlot.HELMET;
+			case "chest" -> ArmorItem.ArmorSlot.CHESTPLATE;
+			case "legs" -> ArmorItem.ArmorSlot.LEGGINGS;
+			case "feet" -> ArmorItem.ArmorSlot.BOOTS;
 			default -> throw new ParseException(id, "Equipment slot not found");
 		};
 		return new ArmorItem(armor, slot, settings);

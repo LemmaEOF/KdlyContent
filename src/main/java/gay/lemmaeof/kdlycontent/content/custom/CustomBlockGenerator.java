@@ -41,7 +41,6 @@ public class CustomBlockGenerator implements BlockGenerator {
 		CustomBlock.RotationProperty rotationProp = CustomBlock.RotationProperty.NONE;
 		CustomBlock.PlacementRule placementRule = CustomBlock.PlacementRule.PLAYER;
 		VoxelShape defaultShape = VoxelShapes.empty();
-		PistonBehavior behavior = PistonBehavior.NORMAL;
 		Map<CustomBlock.FunctionPoint, Identifier> functions = new HashMap<>();
 
 		Map<String, KDLNode> nodes = KdlHelper.mapNodes(customConfig);
@@ -77,16 +76,6 @@ public class CustomBlockGenerator implements BlockGenerator {
 			}
 		}
 
-		if (nodes.containsKey("pistonBehavior")) {
-			KDLNode pistonNode = nodes.get("pistonBehavior");
-			String key = pistonNode.getArgs().get(0).getAsString().getValue();
-			if (NamedProperties.PISTON_BEHAVIORS.containsKey(key)) {
-				behavior = NamedProperties.PISTON_BEHAVIORS.get(key);
-			} else {
-				throw new ParseException(id, "Unknown piston behavior " + key);
-			}
-		}
-
 		if (nodes.containsKey("functions")) {
 			Map<String, KDLNode> funcNodes = KdlHelper.mapNodes(nodes.get("functions").getChild().orElse(new KDLDocument.Builder().build()).getNodes());
 			for (String str : funcNodes.keySet()) {
@@ -100,7 +89,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 			}
 		}
 
-		return new CustomBlock.KdlyBlockProperties(hasWaterlogged, rotationProp, placementRule, defaultShape, behavior, functions);
+		return new CustomBlock.KdlyBlockProperties(hasWaterlogged, rotationProp, placementRule, defaultShape, functions);
 	}
 
 }

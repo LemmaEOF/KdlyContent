@@ -4,7 +4,6 @@ import gay.lemmaeof.kdlycontent.util.VoxelMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -278,7 +277,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 	}
 
 	public record KdlyBlockProperties(boolean hasWaterlogged, RotationProperty rotProp, PlacementRule placement,
-									  VoxelShape defaultShape, PistonBehavior pistonBehavior, Map<FunctionPoint, Identifier> functions) { }
+									  VoxelShape defaultShape, Map<FunctionPoint, Identifier> functions) {}
 
 	public enum RotationProperty {
 		FACING("facing", Properties.FACING),

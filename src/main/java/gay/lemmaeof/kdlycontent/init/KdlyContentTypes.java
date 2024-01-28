@@ -4,8 +4,8 @@ import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.content.type.*;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class KdlyContentTypes {
 

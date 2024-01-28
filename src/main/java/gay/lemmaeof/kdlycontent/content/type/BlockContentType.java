@@ -2,6 +2,7 @@ package gay.lemmaeof.kdlycontent.content.type;
 
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
+import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.util.SettingsParsing;
@@ -10,8 +11,10 @@ import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
 
@@ -36,13 +39,20 @@ public class BlockContentType implements ContentType {
 		List<KDLNode> customConfig = generatorNode == null? Collections.emptyList() : generatorNode.getChild().orElse(KDLDocument.builder().build()).getNodes();
 		BlockGenerator gen = KdlyRegistries.BLOCK_GENERATORS.get(new Identifier(typeName));
 		Block block = gen.generateBlock(id, settings, customConfig);
-		KDLY_BLOCKS.put(id, Registry.register(Registry.BLOCK, id, block));
+		KDLY_BLOCKS.put(id, Registry.register(Registries.BLOCK, id, block));
 
 		//item settings time!
 		KDLNode itemNode = nodes.get("item");
 		if (itemNode != null) {
+			ItemGroup group = KdlyContent.GROUP;
+			if (itemNode.getProps().containsKey("group")) {
+				Identifier groupId = new Identifier(itemNode.getProps().get("group").getAsString().getValue());
+				group = Registries.ITEM_GROUP.get(groupId);
+			}
 			QuiltItemSettings itemSettings = SettingsParsing.parseItemSettings(id, itemNode);
-			ItemContentType.KDLY_ITEMS.put(id, Registry.register(Registry.ITEM, id, new BlockItem(block, itemSettings)));
+			BlockItem item = new BlockItem(block, itemSettings);
+			ItemContentType.KDLY_ITEMS.put(id, Registry.register(Registries.ITEM, id, item));
+			ItemContentType.KDLY_ITEM_GROUPS.computeIfAbsent(group, g -> new ArrayList<>()).add(item);
 		}
 
 		//render layers!

@@ -26,6 +26,13 @@ repositories {
 			includeGroup 'com.unascribed'
 		}
 	}
+
+	maven {
+		url = 'https://api.modrinth.com/maven'
+		content {
+			includeGroup 'maven.modrinth'
+		}
+	}
 }
 
 // All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
@@ -39,6 +46,7 @@ dependencies {
 
 	implementation include("dev.hbeck.kdl:kdl4j:${project.kdl4j_version}")
 	modImplementation include("com.unascribed:lib39-core:${project.lib39_version}")
+	modImplementation include("maven.modrinth:static-data:${project.staticdata_version}")
 }
 
 processResources {

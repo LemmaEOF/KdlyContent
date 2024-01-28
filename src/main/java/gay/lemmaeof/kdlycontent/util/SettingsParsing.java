@@ -9,9 +9,9 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
-import net.minecraft.util.registry.Registry;
 import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings;
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
 
@@ -21,14 +21,12 @@ import java.util.List;
 public class SettingsParsing {
 
 	public static QuiltBlockSettings parseBlockSettings(Identifier id, KDLNode parent) {
-		//TODO: custom sound groups and materials(?)
+		//TODO: custom sound groups(?)
 		QuiltBlockSettings settings;
-		if (parent.getProps().containsKey("material")) {
-			settings = QuiltBlockSettings.of(NamedProperties.MATERIALS.get(parent.getProps().get("material").getAsString().getValue()));
-		} else if (parent.getProps().containsKey("copy")) {
-			settings = QuiltBlockSettings.copyOf(Registry.BLOCK.get(new Identifier(parent.getProps().get("copy").getAsString().getValue())));
+		if (parent.getProps().containsKey("copy")) {
+			settings = QuiltBlockSettings.copyOf(Registries.BLOCK.get(new Identifier(parent.getProps().get("copy").getAsString().getValue())));
 		} else {
-			throw new ParseException(id, "No material or block to copy from");
+			settings = QuiltBlockSettings.create();
 		}
 		for (KDLNode node : parent.getChild().orElse(new KDLDocument.Builder().build()).getNodes()) {
 			switch (node.getIdentifier()) {
@@ -47,14 +45,25 @@ public class SettingsParsing {
 					}
 				}
 				case "breakInstantly" -> settings.breakInstantly();
-				case "ticksRandomly" -> settings.ticksRandomly();
-				case "dynamicBounds" -> settings.dynamicBounds();
+				case "ticksRandomly" -> settings.ticksRandomly(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "dynamicBounds" -> settings.dynamicBounds(node.getArgs().get(0).getAsBooleanOrElse(true));
 				case "dropsNothing" -> settings.dropsNothing();
-				case "dropsLike" -> settings.dropsLike(Registry.BLOCK.get(new Identifier(node.getArgs().get(0).getAsString().getValue())));
+				case "dropsLike" -> settings.dropsLike(Registries.BLOCK.get(new Identifier(node.getArgs().get(0).getAsString().getValue())));
 				case "drops" -> settings.drops(new Identifier(node.getArgs().get(0).getAsString().getValue()));
-				case "air" -> settings.air();
+				case "lavaIgnitable" -> settings.lavaIgnitable(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "liquid" -> settings.liquid(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "solid" -> settings.solid(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "nonSolid" -> settings.nonSolid(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "air" -> settings.air(node.getArgs().get(0).getAsBooleanOrElse(true));
 				//dynamic luminance, allow spawning, solid block, suffocates, blocks vision, post process, and emmissive lighting too complex to model with kdl for now
-				case "requiresTool" -> settings.requiresTool();
+				case "requiresTool" -> settings.requiresTool(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "pistonBehavior" -> settings.pistonBehavior(NamedProperties.PISTON_BEHAVIORS.get(node.getArgs().get(0).getAsString().getValue()));
+				case "offsetType" -> settings.offsetType(NamedProperties.OFFSET_TYPES.get(node.getArgs().get(0).getAsString().getValue()));
+				case "disableParticlesOnBreak" -> settings.disableParticlesOnBreak();
+				//feature flags are hardcoded
+				case "instrument" -> settings.instrument(NamedProperties.INSTRUMENTS.get(node.getArgs().get(0).getAsString().getValue()));
+				case "replaceable" -> settings.replaceable(node.getArgs().get(0).getAsBooleanOrElse(true));
+				case "opaque" -> settings.opaque(node.getArgs().get(0).getAsBooleanOrElse(true));
 				case "mapColor" -> settings.mapColor(NamedProperties.MAP_COLORS.get(node.getArgs().get(0).getAsString().getValue()));
 				case "hardness" -> settings.hardness(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
 				case "resistance" -> settings.resistance(node.getArgs().get(0).getAsNumberOrElse(0).floatValue());
@@ -67,13 +76,12 @@ public class SettingsParsing {
 
 	public static QuiltItemSettings parseItemSettings(Identifier id, KDLNode parent) {
 		QuiltItemSettings settings = new QuiltItemSettings();
-		ItemGroup group = KdlyContent.GROUP;
 		for (KDLNode node : parent.getChild().orElse(new KDLDocument.Builder().build()).getNodes()) {
 			switch (node.getIdentifier()) {
 				case "maxCount" -> settings.maxCount(node.getArgs().get(0).getAsNumberOrElse(0).intValue());
 				case "maxDamage" -> settings.maxDamage(node.getArgs().get(0).getAsNumberOrElse(0).intValue());
 				case "recipeRemainder" ->
-						settings.recipeRemainder(Registry.ITEM.get(new Identifier(node.getArgs().get(0).getAsString().getValue())));
+						settings.recipeRemainder(Registries.ITEM.get(new Identifier(node.getArgs().get(0).getAsString().getValue())));
 				case "rarity" -> {
 					String rarity = node.getArgs().get(0).getAsString().getValue();
 					settings.rarity(switch(rarity) {
@@ -85,19 +93,6 @@ public class SettingsParsing {
 					});
 				}
 				case "fireproof" -> settings.fireproof();
-				case "group" -> {
-					String groupName = node.getArgs().get(0).getAsString().getValue();
-					boolean found = false;
-					for (ItemGroup g : ItemGroup.GROUPS) {
-						if (g.getName().equals(groupName)) {
-							group = g;
-							found = true;
-						}
-					}
-					if (!found) {
-						throw new ParseException(id, "Unknown item group " + groupName);
-					}
-				}
 				case "food" ->
 						settings.food(getFoodComponent(id, node.getChild().orElse(new KDLDocument(new ArrayList<>())).getNodes()));
 				case "equipmentSlot" -> {
@@ -113,7 +108,6 @@ public class SettingsParsing {
 				default -> KdlyContent.LOGGER.info("Unknown node type {} in kdl for item {}", node.getIdentifier(), id);
 			}
 		}
-		settings.group(group);
 		return settings;
 	}
 
@@ -128,7 +122,7 @@ public class SettingsParsing {
 				case "snack" -> builder.snack();
 				case "statusEffect" -> {
 					Identifier effId = new Identifier(node.getArgs().get(0).getAsString().getValue());
-					StatusEffect eff = Registry.STATUS_EFFECT.get(effId);
+					StatusEffect eff = Registries.STATUS_EFFECT.get(effId);
 					if (eff == null) throw new ParseException(id, "Unknown status effect " + effId);
 					float chance = KdlHelper.getProp(node, "chance", 1f);
 					int duration = KdlHelper.getProp(node, "duration", 600);

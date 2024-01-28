@@ -9,10 +9,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.tag.TagKey;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Lazy;
-import net.minecraft.util.registry.Registry;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -47,9 +47,9 @@ public class ToolMaterialContentType implements ContentType {
 		if (repairNode == null) throw new ParseException(id, "No repairIngredient specified");
 		Lazy<Ingredient> repairIng;
 		if (repairNode.getProps().containsKey("tag")) {
-			repairIng = new Lazy<>(() -> Ingredient.ofTag(TagKey.of(Registry.ITEM_KEY, new Identifier(repairNode.getProps().get("tag").getAsString().getValue()))));
+			repairIng = new Lazy<>(() -> Ingredient.ofTag(TagKey.of(Registries.ITEM.getKey(), new Identifier(repairNode.getProps().get("tag").getAsString().getValue()))));
 		} else {
-			repairIng = new Lazy<>(() -> Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registry.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new)));
+			repairIng = new Lazy<>(() -> Ingredient.ofItems(repairNode.getArgs().stream().map(val -> Registries.ITEM.get(new Identifier(val.getAsString().getValue()))).toArray(Item[]::new)));
 		}
 
 		ToolMaterial mat = new CustomToolMaterial(durability, miningSpeedMultiplier, attackDamage, miningLevel, enchantability, repairIng);
