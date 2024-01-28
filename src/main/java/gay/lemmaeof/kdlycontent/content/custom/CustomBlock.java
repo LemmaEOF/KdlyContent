@@ -49,13 +49,13 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 				case HORIZONTAL_AXIS -> shapes.put(state, state.get(props.rotProp.prop) == Direction.Axis.X?
 						props.defaultShape : VoxelMath.rotate(90, props.defaultShape));
 				case FACING, VERTICAL_DIRECTION -> shapes.put(state, switch ((Direction) state.get(props.rotProp.prop)) {
-						case NORTH -> VoxelMath.rotateX(props.defaultShape);
-						case SOUTH -> VoxelMath.rotate(180, VoxelMath.rotateX(props.defaultShape));
-						case EAST -> VoxelMath.rotate(270, VoxelMath.rotateX(props.defaultShape));
-						case WEST -> VoxelMath.rotate(90, VoxelMath.rotateX(props.defaultShape));
-						case UP -> props.defaultShape;
-						case DOWN -> VoxelMath.rotateX(VoxelMath.rotateX(props.defaultShape));
-					});
+					case NORTH -> VoxelMath.rotateX(props.defaultShape);
+					case SOUTH -> VoxelMath.rotate(180, VoxelMath.rotateX(props.defaultShape));
+					case EAST -> VoxelMath.rotate(270, VoxelMath.rotateX(props.defaultShape));
+					case WEST -> VoxelMath.rotate(90, VoxelMath.rotateX(props.defaultShape));
+					case UP -> props.defaultShape;
+					case DOWN -> VoxelMath.rotateX(VoxelMath.rotateX(props.defaultShape));
+				});
 				case HORIZONTAL_FACING, HOPPER_FACING -> shapes.put(state, switch ((Direction) state.get(props.rotProp.prop)) {
 					case NORTH, UP -> props.defaultShape; //up should never happen here so this should be fine
 					case SOUTH -> VoxelMath.rotate(180, props.defaultShape);
