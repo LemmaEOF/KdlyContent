@@ -3,12 +3,10 @@ package gay.lemmaeof.kdlycontent.content.custom;
 import dev.hbeck.kdl.objects.KDLDocument;
 import dev.hbeck.kdl.objects.KDLNode;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
-import gay.lemmaeof.kdlycontent.util.NamedProperties;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
@@ -31,7 +29,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 				super.appendProperties(builder);
 				if (props.hasWaterlogged()) builder.add(Properties.WATERLOGGED);
 				if (props.rotProp() != RotationProperty.NONE) builder.add(props.rotProp().getProp());
-				if (props.functions().containsKey(FunctionPoint.POWERED) || props.functions().containsKey(FunctionPoint.UNPOWERED))
+				if (props.functions().containsKey(BlockFunctionPoint.POWERED) || props.functions().containsKey(BlockFunctionPoint.UNPOWERED))
 					builder.add(Properties.POWERED);
 			}
 		};
@@ -43,7 +41,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 		CustomBlock.RotationProperty rotationProp = CustomBlock.RotationProperty.NONE;
 		CustomBlock.PlacementRule placementRule = CustomBlock.PlacementRule.PLAYER;
 		VoxelShape defaultShape = VoxelShapes.empty();
-		Map<CustomBlock.FunctionPoint, Identifier> functions = new HashMap<>();
+		Map<CustomBlock.BlockFunctionPoint, Identifier> functions = new HashMap<>();
 
 		Map<String, KDLNode> nodes = KdlHelper.mapNodes(customConfig);
 
@@ -83,7 +81,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 			for (String str : funcNodes.keySet()) {
 				KDLNode node = funcNodes.get(str);
 				try {
-					CustomBlock.FunctionPoint point = CustomBlock.FunctionPoint.forName(str);
+					CustomBlock.BlockFunctionPoint point = CustomBlock.BlockFunctionPoint.forName(str);
 					functions.put(point, new Identifier(KdlHelper.getArg(node, 0, "")));
 				} catch (IllegalArgumentException e) {
 					throw new ParseException(id, e.getMessage());

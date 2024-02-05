@@ -5,6 +5,7 @@ import net.minecraft.block.MapColor;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.UseAction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ public class NamedProperties {
 	public static final Map<String, PistonBehavior> PISTON_BEHAVIORS = new HashMap<>();
 	public static final Map<String, AbstractBlock.OffsetType> OFFSET_TYPES = new HashMap<>();
 	public static final Map<String, NoteBlockInstrument> INSTRUMENTS = new HashMap<>();
+	public static final Map<String, UseAction> USE_ACTIONS = new HashMap<>();
 
 	static {
 		//if you appreciate the work I've put in transcribing all of this *by hand*,
@@ -208,5 +210,17 @@ public class NamedProperties {
 		for (NoteBlockInstrument inst : NoteBlockInstrument.values()) {
 			INSTRUMENTS.put(inst.asString(), inst);
 		}
+
+		//Use actions
+		USE_ACTIONS.put("none", UseAction.NONE);
+		USE_ACTIONS.put("eat", UseAction.EAT);
+		USE_ACTIONS.put("drink", UseAction.DRINK);
+		USE_ACTIONS.put("block", UseAction.BLOCK);
+		USE_ACTIONS.put("bow", UseAction.BOW);
+		USE_ACTIONS.put("spear", UseAction.SPEAR);
+		USE_ACTIONS.put("crossbow", UseAction.CROSSBOW);
+		USE_ACTIONS.put("toot_horn", UseAction.TOOT_HORN);
+		USE_ACTIONS.put("spyglass", UseAction.SPYGLASS);
+		USE_ACTIONS.put("brush", UseAction.BRUSH);
 	}
 }

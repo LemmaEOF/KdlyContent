@@ -4,7 +4,6 @@ import gay.lemmaeof.kdlycontent.util.VoxelMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -12,15 +11,12 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.function.CommandFunction;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.*;
 import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.random.RandomGenerator;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
@@ -30,9 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-public abstract class CustomBlock extends Block implements MaybeWaterloggable {
+public abstract class CustomBlock extends Block implements MaybeWaterloggable, FunctionRunnable<CustomBlock.BlockFunctionPoint> {
 	private static final BooleanProperty POWERED = Properties.POWERED;
 	private final KdlyBlockProperties props;
 	private final Map<BlockState, VoxelShape> shapes = new HashMap<>();
@@ -179,9 +174,9 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, RandomGenerator random) {
 		if (state.contains(POWERED)) {
 			if (state.get(POWERED)) {
-				this.runFunction(world, pos, null, FunctionPoint.POWERED);
+				this.runFunction(world, pos, null, BlockFunctionPoint.POWERED);
 			} else {
-				this.runFunction(world, pos, null, FunctionPoint.UNPOWERED);
+				this.runFunction(world, pos, null, BlockFunctionPoint.UNPOWERED);
 			}
 		}
 	}
@@ -197,6 +192,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 		return base;
 	}
 
+	@Override
 	public FluidState getFluidState(BlockState state) {
 	  return state.contains(Properties.WATERLOGGED) && state.get(Properties.WATERLOGGED)
 		? Fluids.WATER.getStill(false)
@@ -243,58 +239,46 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 		}
 	}
 
-	private boolean runFunction(World world, BlockPos pos, @Nullable Entity user, FunctionPoint point) {
-		if (!world.isClient) {
-			Identifier functionId = props.functions.get(point);
-			if (functionId != null) {
-				Optional<CommandFunction> funcOpt = world.getServer().getCommandFunctionManager().getFunction(functionId);
-				if (funcOpt.isPresent()) {
-					CommandFunction func = funcOpt.get();
-					ServerCommandSource src = user != null? user.getCommandSource() : world.getServer().getCommandSource();
-					src = src.withPosition(new Vec3d(pos.getX(), pos.getY(), pos.getZ())).withLevel(2).withSilent();
-					world.getServer().getCommandFunctionManager().execute(func, src);
-					return true;
-				}
-			}
-		}
-		return false;
+	@Override
+	public Map<BlockFunctionPoint, Identifier> getFunctions() {
+		return props.functions;
 	}
 
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
 		super.onPlaced(world, pos, state, placer, itemStack);
-		runFunction(world, pos, placer, FunctionPoint.PLACED);
+		runFunction(world, pos, placer, BlockFunctionPoint.PLACED);
 	}
 
 	@Override
 	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		super.onBreak(world, pos, state, player);
-		runFunction(world, pos, player, FunctionPoint.BROKEN);
+		runFunction(world, pos, player, BlockFunctionPoint.BROKEN);
 	}
 
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		super.onStateReplaced(state, world, pos, newState, moved);
-		if (newState.getBlock() != this) runFunction(world, pos, null, FunctionPoint.REMOVED);
+		if (newState.getBlock() != this) runFunction(world, pos, null, BlockFunctionPoint.REMOVED);
 	}
 
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
 		super.onUse(state, world, pos, player, hand, hit);
-		if (runFunction(world, pos, player, FunctionPoint.USED)) return ActionResult.SUCCESS;
+		if (runFunction(world, pos, player, BlockFunctionPoint.USED)) return ActionResult.SUCCESS;
 		else return ActionResult.PASS;
 	}
 
 	@Override
 	public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
 		super.onBlockBreakStart(state, world, pos, player);
-		runFunction(world, pos, player, FunctionPoint.PUNCHED);
+		runFunction(world, pos, player, BlockFunctionPoint.PUNCHED);
 	}
 
 	@Override
 	public void onProjectileHit(World world, BlockState state, BlockHitResult hit, ProjectileEntity projectile) {
 		super.onProjectileHit(world, state, hit, projectile);
-		runFunction(world, hit.getBlockPos(), projectile.getOwner(), FunctionPoint.SHOT);
+		runFunction(world, hit.getBlockPos(), projectile.getOwner(), BlockFunctionPoint.SHOT);
 	}
 
 	@Override
@@ -303,7 +287,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 	}
 
 	public record KdlyBlockProperties(boolean hasWaterlogged, RotationProperty rotProp, PlacementRule placement,
-									  VoxelShape defaultShape, Map<FunctionPoint, Identifier> functions) {}
+									  VoxelShape defaultShape, Map<BlockFunctionPoint, Identifier> functions) {}
 
 	public enum RotationProperty {
 		FACING("facing", Properties.FACING),
@@ -362,7 +346,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 		}
 	}
 
-	public enum FunctionPoint {
+	public enum BlockFunctionPoint {
 		PLACED("placed"),
 		BROKEN("broken"),
 		REMOVED("removed"),
@@ -374,7 +358,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 
 		private final String name;
 
-		FunctionPoint(String name) {
+		BlockFunctionPoint(String name) {
 			this.name = name;
 		}
 
@@ -382,11 +366,11 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable {
 			return name;
 		}
 
-		public static FunctionPoint forName(String name) {
-			for (FunctionPoint point : values()) {
+		public static BlockFunctionPoint forName(String name) {
+			for (BlockFunctionPoint point : values()) {
 				if (name.equals(point.name)) return point;
 			}
-			throw new IllegalArgumentException("Unknown function point " + name);
+			throw new IllegalArgumentException("Unknown block function point " + name);
 		}
 	}
 }

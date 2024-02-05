@@ -33,27 +33,17 @@ public class KdlyTools {
 		Item create(ToolMaterial material, float attackDamage, float attackSpeed, QuiltItemSettings settings);
 	}
 
-	public static class KdlyPickaxe extends PickaxeItem {
-		public KdlyPickaxe(ToolMaterial toolMaterial, float attackDamage, float attackSpeed, Settings settings) {
-			super(toolMaterial, (int) attackDamage, attackSpeed, settings);
-		}
+	//have to exist because these technically take ints for attack damage :<
+
+	public static Item newPick(ToolMaterial material, float attackDamage, float attackSpeed, QuiltItemSettings settings) {
+		return new PickaxeItem(material, (int) attackDamage, attackSpeed, settings);
 	}
 
-	public static class KdlyAxe extends AxeItem {
-		public KdlyAxe(ToolMaterial toolMaterial, float attackDamage, float attackSpeed, Settings settings) {
-			super(toolMaterial, attackDamage, attackSpeed, settings);
-		}
+	public static Item newHoe(ToolMaterial material, float attackDamage, float attackSpeed, QuiltItemSettings settings) {
+		return new HoeItem(material, (int) attackDamage, attackSpeed, settings);
 	}
 
-	public static class KdlyHoe extends HoeItem {
-		public KdlyHoe(ToolMaterial toolMaterial, float attackDamage, float attackSpeed, Settings settings) {
-			super(toolMaterial, (int)attackDamage, attackSpeed, settings);
-		}
-	}
-
-	public static class KdlySword extends SwordItem {
-		public KdlySword(ToolMaterial toolMaterial, float attackDamage, float attackSpeed, Settings settings) {
-			super(toolMaterial, (int)attackDamage, attackSpeed, settings);
-		}
+	public static Item newSword(ToolMaterial material, float attackDamage, float attackSpeed, QuiltItemSettings settings) {
+		return new SwordItem(material, (int) attackDamage, attackSpeed, settings);
 	}
 }

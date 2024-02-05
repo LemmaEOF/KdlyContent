@@ -7,6 +7,9 @@ import gay.lemmaeof.kdlycontent.api.ItemGenerator;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.content.custom.CustomBlockGenerator;
+import gay.lemmaeof.kdlycontent.content.custom.CustomItemGenerator;
+import gay.lemmaeof.kdlycontent.content.custom.CustomSwordItemGenerator;
+import gay.lemmaeof.kdlycontent.content.custom.CustomToolItemGenerator;
 import gay.lemmaeof.kdlycontent.content.type.ArmorMaterialContentType;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.util.KdlyTools;
@@ -14,10 +17,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.WallBlock;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.Item;
-import net.minecraft.item.ShovelItem;
+import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -38,11 +38,11 @@ public class KdlyGenerators {
 	public static final BlockGenerator CUSTOM_BLOCK = registerBlockGen("custom", new CustomBlockGenerator());
 
 	public static final ItemGenerator STANDARD_ITEM = registerItemGen("standard", (id, settings, customConfig) -> new Item(settings));
-	public static final ItemGenerator PICKAXE = registerItemGen("pickaxe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools.KdlyPickaxe::new));
-	public static final ItemGenerator AXE = registerItemGen("axe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools.KdlyAxe::new));
+	public static final ItemGenerator PICKAXE = registerItemGen("pickaxe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools::newPick));
+	public static final ItemGenerator AXE = registerItemGen("axe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, AxeItem::new));
 	public static final ItemGenerator SHOVEL = registerItemGen("shovel", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, ShovelItem::new));
-	public static final ItemGenerator HOE = registerItemGen("hoe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools.KdlyHoe::new));
-	public static final ItemGenerator SWORD = registerItemGen("sword", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools.KdlySword::new));
+	public static final ItemGenerator HOE = registerItemGen("hoe", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools::newHoe));
+	public static final ItemGenerator SWORD = registerItemGen("sword", (id, settings, customConfig) -> KdlyTools.construct(id, settings, customConfig, KdlyTools::newSword));
 	public static final ItemGenerator ARMOR = registerItemGen("armor", (id, settings, customConfig) -> {
 		KDLNode materialNode = KdlHelper.getChild(customConfig, "material");
 		if (materialNode == null) throw new ParseException(id, "No armor material specified");
@@ -59,7 +59,9 @@ public class KdlyGenerators {
 		};
 		return new ArmorItem(armor, slot, settings);
 	});
-	//TODO: custom item
+	public static final ItemGenerator CUSTOM_ITEM = registerItemGen("custom", new CustomItemGenerator());
+	public static final ItemGenerator CUSTOM_TOOL = registerItemGen("custom_tool", new CustomToolItemGenerator());
+	public static final ItemGenerator CUSTOM_SWORD = registerItemGen("custom_sword", new CustomSwordItemGenerator());
 
 	private static BlockGenerator registerBlockGen(String name, BlockGenerator generator) {
 		return Registry.register(KdlyRegistries.BLOCK_GENERATORS, new Identifier(KdlyContent.MODID, name), generator);
