@@ -35,24 +35,24 @@ public class CustomItemGenerator implements ItemGenerator {
 
 		if (nodes.containsKey("bar")) {
 			Map<String, KDLNode> barNodes = KdlHelper.mapNodes(nodes.get("bar").getChild().orElse(new KDLDocument.Builder().build()).getNodes());
-			int color = KdlHelper.getArg(barNodes.get("color"), 1, 0xFFFFFF);
-			String tag = KdlHelper.getArg(nodes.get("tag"), 1, "");
-			int max = KdlHelper.getArg(nodes.get("max"), 1, 0);
-			boolean showWhenFull = KdlHelper.getArg(nodes.get("showWhenFull"), 1, false);
+			int color = KdlHelper.getArg(barNodes.get("color"), 0, 0xFFFFFF);
+			String tag = KdlHelper.getArg(barNodes.get("tag"), 0, "");
+			int max = KdlHelper.getArg(barNodes.get("max"), 0, 0);
+			boolean showWhenFull = KdlHelper.getArg(barNodes.get("showWhenFull"), 0, false);
 			bar = new KdlyItemProperties.BarProperties(color, tag, max, showWhenFull);
 		}
 
 		if (nodes.containsKey("charge")) {
 			Map<String, KDLNode> chargeNodes = KdlHelper.mapNodes(nodes.get("charge").getChild().orElse(new KDLDocument.Builder().build()).getNodes());
-			int minDuration = KdlHelper.getArg(chargeNodes.get("minDuration"), 1, 0);
-			int maxDuration = KdlHelper.getArg(chargeNodes.get("maxDuration"), 1, 0);
-			UseAction action = NamedProperties.USE_ACTIONS.get(KdlHelper.getArg(chargeNodes.get("action"), 1, "none"));
+			int minDuration = KdlHelper.getArg(chargeNodes.get("minDuration"), 0, 0);
+			int maxDuration = KdlHelper.getArg(chargeNodes.get("maxDuration"), 0, 0);
+			UseAction action = NamedProperties.USE_ACTIONS.get(KdlHelper.getArg(chargeNodes.get("action"), 0, "none"));
 			charge = new KdlyItemProperties.ChargeProperties(minDuration, maxDuration, action);
 		}
 
-		if (nodes.containsKey("glint")) hasGlint = KdlHelper.getArg(nodes.get("glint"), 1, true);
+		if (nodes.containsKey("glint")) hasGlint = KdlHelper.getArg(nodes.get("glint"), 0, true);
 
-		if (nodes.containsKey("selfRemainder")) selfRemainder = KdlHelper.getArg(nodes.get("selfRemainder"), 1, true);
+		if (nodes.containsKey("selfRemainder")) selfRemainder = KdlHelper.getArg(nodes.get("selfRemainder"), 0, true);
 
 		if (nodes.containsKey("lore")) {
 			List<KDLNode> loreLines = nodes.get("lore").getChild().orElse(new KDLDocument.Builder().build()).getNodes();

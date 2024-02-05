@@ -19,7 +19,7 @@ public class CustomToolItemGenerator extends CustomItemGenerator {
 	public Item generateItem(Identifier id, QuiltItemSettings settings, List<KDLNode> customConfig) throws ParseException {
 		KdlyItemProperties props = parseProperties(id, customConfig);
 		Map<String, KDLNode> nodes = KdlHelper.mapNodes(customConfig);
-		Identifier tagId = new Identifier(KdlHelper.getArg(nodes.get("tag"), 1, ""));
+		Identifier tagId = new Identifier(KdlHelper.getArg(nodes.get("tag"), 0, ""));
 		TagKey<Block> tag = TagKey.of(Registries.BLOCK.getKey(), tagId);
 		return KdlyTools.construct(id, settings, customConfig,
 				(material, attackDamage, attackSpeed, s) -> new CustomToolItem(attackDamage, attackSpeed, material, tag, settings, props));
