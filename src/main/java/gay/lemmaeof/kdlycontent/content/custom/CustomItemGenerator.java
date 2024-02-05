@@ -75,6 +75,7 @@ public class CustomItemGenerator implements ItemGenerator {
 			}
 		}
 
+		//TODO: allow charge finish for foods?
 		if (charge == null &&
 				(functions.containsKey(KdlyItemProperties.ItemFunctionPoint.CHARGE_FINISH)
 						|| functions.containsKey(KdlyItemProperties.ItemFunctionPoint.CHARGE_RELEASE))) {
