@@ -35,6 +35,14 @@
 			{
 				"id": "minecraft",
 				"versions": ">=1.19"
+			},
+			{
+				"id": "static-data",
+				"versions": "*"
+			},
+			{
+				"id": "lib39-core",
+				"versions": "*"
 			}
 		]
 	}
