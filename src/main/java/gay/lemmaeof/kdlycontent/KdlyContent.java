@@ -2,6 +2,7 @@ package gay.lemmaeof.kdlycontent;
 
 import dev.kdl.KdlDocument;
 import dev.kdl.KdlNode;
+import dev.kdl.parse.Kdl1Parser;
 import dev.kdl.parse.Kdl2Parser;
 import dev.kdl.parse.KdlParseException;
 import dev.kdl.parse.KdlParser;
@@ -40,7 +41,8 @@ public class KdlyContent implements ModInitializer {
 	public static final String MODID = "kdlycontent";
 	public static final Logger LOGGER = LoggerFactory.getLogger("KdlyContent");
 
-	private static final KdlParser parser = new Kdl2Parser();
+	private static final KdlParser V2_PARSER = new Kdl2Parser();
+	private static final KdlParser V1_PARSER = new Kdl1Parser();
 
 	public static final ItemGroup GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of(MODID, "generated"),
 			FabricItemGroup.builder()
@@ -64,10 +66,22 @@ public class KdlyContent implements ModInitializer {
 		List<StaticDataItem> data = StaticData.getExactData(Identifier.of("", "kdlycontent.kdl"));
 		for (StaticDataItem item : data) {
 			String namespace = item.getModId();
+			KdlDocument kdl;
 			try {
-				KdlDocument kdl = parser.parse(item.getAsStream());
+				try {
+					//give kdl v2 a shot
+					kdl = V2_PARSER.parse(item.getAsStream());
+				} catch (KdlParseException e) {
+					//parse fail - could be kdl v1?
+					try {
+						kdl = V1_PARSER.parse(item.getAsStream());
+					} catch (KdlParseException x) {
+						//nope! freak the fuck out and blow up
+						throw new RuntimeException("Could not parse KDL for file" + item.getResourceId(), e);
+					}
+				}
 				parseKdl(namespace, kdl);
-			} catch (IOException | ParseException | KdlParseException e) {
+			} catch (IOException | ParseException e) {
 				throw new RuntimeException("Could not load KDL for file " + item.getResourceId(), e);
 			}
 		}
