@@ -9,6 +9,7 @@ import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.component.ComponentType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
@@ -21,8 +22,12 @@ public class SettingsParsing {
 		//TODO: custom sound groups(?)
 		AbstractBlock.Settings settings;
 		if (parent.properties().hasProperty("copy")) {
-			Identifier copyId = Identifier.of(KdlHelper.getProp(parent, "copy", ""));
-			Block copyBlock = Registries.BLOCK.get(copyId);
+			String copyId = KdlHelper.getProp(parent, "copy", "");
+			Block copyBlock = Registries.BLOCK.get(Identifier.of(copyId));
+			//if the block is missing and not like that on purpose, assume grabbing from same namespce
+			if (copyBlock == Blocks.AIR && !copyId.contains(":") && !copyId.equals("air")) {
+				copyBlock = Registries.BLOCK.get(Identifier.of(id.getNamespace(), copyId));
+			}
 			settings = AbstractBlock.Settings.copy(copyBlock);
 		} else {
 			settings = AbstractBlock.Settings.create();
