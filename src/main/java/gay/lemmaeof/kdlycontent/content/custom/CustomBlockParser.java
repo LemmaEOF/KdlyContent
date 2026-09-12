@@ -27,7 +27,6 @@ public class CustomBlockParser implements BlockParser {
 		return ret;
 	}
 
-	//TODO: generify even more but this at least makes it much less painful to extend CustomBlock and such
 	protected CustomBlock.KdlyBlockBehaviors parseBehaviors(Identifier id, List<KdlNode> customConfig) {
 		boolean hasWaterlogged = false;
 		CustomBlock.RotationProperty rotationProp = CustomBlock.RotationProperty.NONE;

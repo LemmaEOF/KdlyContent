@@ -27,25 +27,25 @@ public class ArmorMaterialContentType implements ContentType {
 	@Override
 	public void generateFrom(Identifier id, KdlNode parent) throws ParseException {
 		Map<String, KdlNode> nodes = KdlHelper.mapNodes(parent.children());
-		KdlNode protectionNode = nodes.get("protection");
-		if (protectionNode == null) throw new ParseException(id, "No protection specified");
+		KdlNode protectionNode = nodes.get("defense");
+		if (protectionNode == null) throw new ParseException(id, "No defense specified");
 		EnumMap<ArmorItem.Type, Integer> protection = parseSlots(id, protectionNode);
 		KdlNode toughnessNode = nodes.get("toughness");
 		if (toughnessNode == null) throw new ParseException(id, "No toughness specified");
 		float toughness = KdlHelper.getArg(toughnessNode, 0, 0f);
-		KdlNode resistanceNode = nodes.get("knockbackResistance");
-		if (resistanceNode == null) throw new ParseException(id, "No knockbackResistance specified");
+		KdlNode resistanceNode = nodes.get("knockback_resistance");
+		if (resistanceNode == null) throw new ParseException(id, "No knockback_resistance specified");
 		float knockbackResistance = KdlHelper.getArg(toughnessNode, 0, 0f);
 		KdlNode enchantabilityNode = nodes.get("enchantability");
 		if (enchantabilityNode == null) throw new ParseException(id, "No enchantability specified");
 		int enchantability = KdlHelper.getArg(enchantabilityNode, 0, 0);
-		KdlNode equipSoundNode = nodes.get("equipSound");
-		if (equipSoundNode == null) throw new ParseException(id, "No equipSound specified");
+		KdlNode equipSoundNode = nodes.get("equip_sound");
+		if (equipSoundNode == null) throw new ParseException(id, "No equip_sound specified");
 		RegistryEntry<SoundEvent> equipSound = Registries.SOUND_EVENT.getEntry(Identifier.of(KdlHelper.getArg(equipSoundNode, 0, ""))).get();
 
 		//fun stuff for ingredients, whee
-		KdlNode repairNode = nodes.get("repairIngredient");
-		if (repairNode == null) throw new ParseException(id, "No repairIngredient specified");
+		KdlNode repairNode = nodes.get("repair_ingredient");
+		if (repairNode == null) throw new ParseException(id, "No repair_ingredient specified");
 		Supplier<Ingredient> repairIng;
 		if (repairNode.properties().hasProperty("tag")) {
 			repairIng = () -> Ingredient.fromTag(TagKey.of(Registries.ITEM.getKey(), Identifier.of(String.valueOf(repairNode.properties().getValue("tag").get()))));

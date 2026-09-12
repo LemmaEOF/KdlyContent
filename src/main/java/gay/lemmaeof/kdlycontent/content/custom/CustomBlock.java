@@ -3,7 +3,6 @@ package gay.lemmaeof.kdlycontent.content.custom;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.util.VoxelMath;
 import gay.lemmaeof.kdlycontent.util.Cuboid;
 import net.minecraft.block.Block;

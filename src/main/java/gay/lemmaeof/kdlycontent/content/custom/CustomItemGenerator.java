@@ -31,19 +31,19 @@ public class CustomItemGenerator implements ItemGenerator {
 			int color = KdlHelper.getArg(barNodes.get("color"), 0, 0xFFFFFF);
 			String tag = KdlHelper.getArg(barNodes.get("tag"), 0, "");
 			int max = KdlHelper.getArg(barNodes.get("max"), 0, 0);
-			boolean showWhenFull = KdlHelper.getArg(barNodes.get("showWhenFull"), 0, false);
+			boolean showWhenFull = KdlHelper.getArg(barNodes.get("show_when_full"), 0, false);
 			bar = new KdlyItemProperties.BarProperties(color, tag, max, showWhenFull);
 		}
 
 		if (nodes.containsKey("charge")) {
 			Map<String, KdlNode> chargeNodes = KdlHelper.mapNodes(nodes.get("charge").children());
-			int minDuration = KdlHelper.getArg(chargeNodes.get("minDuration"), 0, 0);
-			int maxDuration = KdlHelper.getArg(chargeNodes.get("maxDuration"), 0, 0);
+			int minDuration = KdlHelper.getArg(chargeNodes.get("min_duration"), 0, 0);
+			int maxDuration = KdlHelper.getArg(chargeNodes.get("max_duration"), 0, 0);
 			UseAction action = NamedProperties.USE_ACTIONS.get(KdlHelper.getArg(chargeNodes.get("action"), 0, "none"));
 			charge = new KdlyItemProperties.ChargeProperties(minDuration, maxDuration, action);
 		}
 
-		if (nodes.containsKey("selfRemainder")) selfRemainder = KdlHelper.getArg(nodes.get("selfRemainder"), 0, true);
+		if (nodes.containsKey("self_remainder")) selfRemainder = KdlHelper.getArg(nodes.get("self_remainder"), 0, true);
 
 		if (nodes.containsKey("functions")) {
 			Map<String, KdlNode> funcNodes = KdlHelper.mapNodes(nodes.get("functions").children());

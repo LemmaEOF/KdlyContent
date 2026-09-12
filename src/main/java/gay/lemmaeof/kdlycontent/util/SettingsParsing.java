@@ -34,11 +34,11 @@ public class SettingsParsing {
 		}
 		for (KdlNode node : parent.children()) {
 			switch (node.name()) {
-				case "noCollision" -> settings.noCollision();
-				case "nonOpaque" -> settings.nonOpaque();
+				case "no_collision" -> settings.noCollision();
+				case "non_opaque" -> settings.nonOpaque();
 				case "slipperiness" -> settings.slipperiness(KdlHelper.getArg(node, 0, 0f));
-				case "velocityMultiplier" -> settings.velocityMultiplier(KdlHelper.getArg(node, 0, 0f));
-				case "jumpVelocityMultiplier" -> settings.jumpVelocityMultiplier(KdlHelper.getArg(node, 0, 0f));
+				case "velocity_multiplier" -> settings.velocityMultiplier(KdlHelper.getArg(node, 0, 0f));
+				case "jump_velocity_multiplier" -> settings.jumpVelocityMultiplier(KdlHelper.getArg(node, 0, 0f));
 				case "sounds" -> settings.sounds(NamedProperties.SOUND_GROUPS.get(KdlHelper.getArg(node, 0, "wood")));
 				case "luminance" -> settings.luminance(state -> KdlHelper.getArg(node, 0, 0));
 				case "strength" -> {
@@ -48,26 +48,26 @@ public class SettingsParsing {
 						settings.strength(KdlHelper.getArg(node, 0, 0f), KdlHelper.getArg(node, 1, 0f));
 					}
 				}
-				case "breakInstantly" -> settings.breakInstantly();
-				case "ticksRandomly" -> settings.ticksRandomly();
-				case "dynamicBounds" -> settings.dynamicBounds();
-				case "dropsNothing" -> settings.dropsNothing();
-				case "dropsLike" -> settings.dropsLike(Registries.BLOCK.get(Identifier.of(KdlHelper.getArg(node, 0, "minecraft:air"))));
+				case "break_instantly" -> settings.breakInstantly();
+				case "ticks_randomly" -> settings.ticksRandomly();
+				case "dynamic_bounds" -> settings.dynamicBounds();
+				case "drops_nothing" -> settings.dropsNothing();
+				case "drops_like" -> settings.dropsLike(Registries.BLOCK.get(Identifier.of(KdlHelper.getArg(node, 0, "minecraft:air"))));
 //				case "drops" -> settings.dropsLike(Registries.BLOCK.get(Identifier.of(KdlHelper.getArg(node, 0, "minecraft:blocks/air"))));
 				case "burnable" -> settings.burnable();
 				case "liquid" -> settings.liquid();
 				case "solid" -> settings.solid();
-				case "nonSolid" -> settings.notSolid();
+				case "not_solid" -> settings.notSolid();
 				case "air" -> settings.air();
 				//dynamic luminance, allow spawning, solid block, suffocates, blocks vision, post process, and emmissive lighting too complex to model with kdl for now
-				case "requiresTool" -> settings.requiresTool();
-				case "pistonBehavior" -> settings.pistonBehavior(NamedProperties.PISTON_BEHAVIORS.get(KdlHelper.getArg(node, 0, "push")));
-				case "offsetType" -> settings.offset(NamedProperties.OFFSET_TYPES.get(KdlHelper.getArg(node, 0, "none")));
-				case "noBlockBreakParticles" -> settings.noBlockBreakParticles();
+				case "requires_tool" -> settings.requiresTool();
+				case "piston_behavior" -> settings.pistonBehavior(NamedProperties.PISTON_BEHAVIORS.get(KdlHelper.getArg(node, 0, "push")));
+				case "offset_type" -> settings.offset(NamedProperties.OFFSET_TYPES.get(KdlHelper.getArg(node, 0, "none")));
+				case "no_block_break_particles" -> settings.noBlockBreakParticles();
 				//feature flags are hardcoded
 				case "instrument" -> settings.instrument(NamedProperties.INSTRUMENTS.get(KdlHelper.getArg(node, 0, "harp")));
 				case "replaceable" -> settings.replaceable();
-				case "mapColor" -> settings.mapColor(NamedProperties.MAP_COLORS.get(KdlHelper.getArg(node, 0, "none")));
+				case "map_color" -> settings.mapColor(NamedProperties.MAP_COLORS.get(KdlHelper.getArg(node, 0, "none")));
 				case "hardness" -> settings.hardness(KdlHelper.getArg(node, 0, 0f));
 				case "resistance" -> settings.resistance(KdlHelper.getArg(node, 0, 0f));
 				default -> KdlyContent.LOGGER.info("Unknown node type {} in kdl for block {}", node.name(), id);
@@ -80,9 +80,9 @@ public class SettingsParsing {
 		Item.Settings settings = new Item.Settings();
 		for (KdlNode node : parent.children()) {
 			switch (node.name()) {
-				case "maxCount" -> settings.maxCount(KdlHelper.getArg(node, 0, 0));
-				case "maxDamage" -> settings.maxDamage(KdlHelper.getArg(node, 0, 0));
-				case "recipeRemainder" ->
+				case "max_count" -> settings.maxCount(KdlHelper.getArg(node, 0, 0));
+				case "max_damage" -> settings.maxDamage(KdlHelper.getArg(node, 0, 0));
+				case "recipe_remainder" ->
 						settings.recipeRemainder(Registries.ITEM.get(Identifier.of(KdlHelper.getArg(node, 0, "air"))));
 				case "rarity" -> {
 					String rarity = KdlHelper.getArg(node, 0, "common");
@@ -95,7 +95,7 @@ public class SettingsParsing {
 					});
 				}
 				case "fireproof" -> settings.fireproof();
-				case "equipmentSlot" -> {
+				case "equipment_slot" -> {
 					String slot = KdlHelper.getArg(node, 0, "");
 					settings.equipmentSlot((entity, stack) -> switch(slot) {
 						case "head" -> EquipmentSlot.HEAD;

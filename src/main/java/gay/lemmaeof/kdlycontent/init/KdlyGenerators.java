@@ -28,8 +28,8 @@ public class KdlyGenerators {
 	public static final ItemGenerator ARMOR = registerItemGen("armor", (id, settings, customConfig) -> {
 		KdlNode materialNode = KdlHelper.getChild(customConfig, "material");
 		if (materialNode == null) throw new ParseException(id, "No armor material specified");
-		KdlNode slotNode = KdlHelper.getChild(customConfig, "equipmentSlot");
-		if (slotNode == null) throw new ParseException(id, "No equipmentSlot specified");
+		KdlNode slotNode = KdlHelper.getChild(customConfig, "equipment_slot");
+		if (slotNode == null) throw new ParseException(id, "No equipment_slot specified");
 		RegistryEntry<ArmorMaterial> armor = ArmorMaterialContentType.getMaterial(KdlHelper.getArg(materialNode, 0, "diamond"), id);
 		String slotName = KdlHelper.getArg(slotNode, 0, "head");
 		ArmorItem.Type slot = switch (slotName) {

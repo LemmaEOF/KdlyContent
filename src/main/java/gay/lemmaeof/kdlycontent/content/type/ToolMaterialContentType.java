@@ -27,24 +27,24 @@ public class ToolMaterialContentType implements ContentType {
 	@Override
 	public void generateFrom(Identifier id, KdlNode parent) throws ParseException {
 		Map<String, KdlNode> nodes = KdlHelper.mapNodes(parent.children());
-		KdlNode durabilityNode = nodes.get("maxDamage");
-		if (durabilityNode == null) throw new ParseException(id, "No maxDamage specified");
+		KdlNode durabilityNode = nodes.get("max_damage");
+		if (durabilityNode == null) throw new ParseException(id, "No max_damage specified");
 		int durability = KdlHelper.getArg(durabilityNode, 0, 59);
-		KdlNode speedNode = nodes.get("miningSpeed");
-		if (speedNode == null) throw new ParseException(id, "No miningSpeed specified");
+		KdlNode speedNode = nodes.get("mining_speed");
+		if (speedNode == null) throw new ParseException(id, "No mining_speed specified");
 		float miningSpeedMultiplier = KdlHelper.getArg(speedNode, 0, 1f);
-		KdlNode attackNode = nodes.get("baseAttackDamage");
-		if (attackNode == null) throw new ParseException(id, "No baseAttackDamage specified");
+		KdlNode attackNode = nodes.get("base_attack_damage");
+		if (attackNode == null) throw new ParseException(id, "No base_attack_damage specified");
 		float attackDamage = KdlHelper.getArg(attackNode, 0, 1f);
-		KdlNode inverseTagNode = nodes.get("inverseTag");
-		if (inverseTagNode == null) throw new ParseException(id, "No inverseTag specified");
+		KdlNode inverseTagNode = nodes.get("inverse_tag");
+		if (inverseTagNode == null) throw new ParseException(id, "No inverse_tag specified");
 		TagKey<Block> inverseTag = TagKey.of(RegistryKeys.BLOCK, Identifier.of(KdlHelper.getArg(inverseTagNode, 0, "")));
 		KdlNode enchantabilityNode = nodes.get("enchantability");
 		if (enchantabilityNode == null) throw new ParseException(id, "No enchantability specified");
 		int enchantability = KdlHelper.getArg(enchantabilityNode, 0, 1);
 
 		//fun stuff for ingredients, whee
-		KdlNode repairNode = nodes.get("repairIngredient");
+		KdlNode repairNode = nodes.get("repair_ingredient");
 		if (repairNode == null) throw new ParseException(id, "No repairIngredient specified");
 		Supplier<Ingredient> repairIng;
 		if (repairNode.properties().hasProperty("tag")) {
@@ -60,7 +60,7 @@ public class ToolMaterialContentType implements ContentType {
 
 	@Override
 	public Optional<String> getApplyMessage() {
-		if (KDLY_TOOL_MATERIALS.size() > 0)
+		if (!KDLY_TOOL_MATERIALS.isEmpty())
 			return Optional.of(MessageFormat.format("{0} tool material{1}", KDLY_TOOL_MATERIALS.size(), KDLY_TOOL_MATERIALS.size() == 1? "" : "s"));
 		return Optional.empty();
 	}

@@ -91,7 +91,7 @@ public class KdlyContent implements ModInitializer {
 		Map<ContentType, Map<Identifier, KdlNode>> templates = new HashMap<>();
 		for (KdlNode node : kdl.nodes()) {
 			Identifier id = Identifier.of(namespace, "anonymous");
-			String typeName = toSnakeCase(node.name());
+			String typeName = node.name();
 			if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
 			Identifier typeId = Identifier.of(typeName);
 			if (KdlyRegistries.CONTENT_TYPES.containsId(typeId)) {
@@ -126,13 +126,5 @@ public class KdlyContent implements ModInitializer {
 				throw new ParseException(id, "Content type `" + node.name() + "` not found (converted to `" + typeId + "`)");
 			}
 		}
-	}
-
-	protected String toSnakeCase(String original) {
-		//this may be considered sliiiightly evil, my condolences
-		String regex = "([a-z])([A-Z]+)";
-		String replacement = "$1_$2";
-		original = original.replaceAll(regex, replacement).toLowerCase();
-		return original;
 	}
 }

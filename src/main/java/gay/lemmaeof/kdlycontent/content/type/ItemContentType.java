@@ -45,7 +45,7 @@ public class ItemContentType implements ContentType {
 
 	@Override
 	public Optional<String> getApplyMessage() {
-		if (KDLY_ITEMS.size() > 0)
+		if (!KDLY_ITEMS.isEmpty())
 			return Optional.of(MessageFormat.format("{0} item{1}", KDLY_ITEMS.size(), KDLY_ITEMS.size() == 1? "" : "s"));
 		return Optional.empty();
 	}
