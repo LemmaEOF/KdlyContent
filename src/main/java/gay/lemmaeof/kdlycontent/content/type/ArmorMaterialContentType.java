@@ -60,7 +60,7 @@ public class ArmorMaterialContentType implements ContentType {
 			Identifier layerId = Identifier.of(KdlHelper.getArg(layerNode, 0, ""));
 			String suffix = KdlHelper.getProp(layerNode, "suffix", "");
 			boolean dyeable = KdlHelper.getProp(layerNode, "dyeable", false);
-			layers.add(new ArmorMaterial.Layer(id, suffix, dyeable));
+			layers.add(new ArmorMaterial.Layer(layerId, suffix, dyeable));
 		}
 
 		ArmorMaterial mat = new ArmorMaterial(protection, enchantability, equipSound, repairIng, layers, toughness, knockbackResistance);
@@ -88,15 +88,19 @@ public class ArmorMaterialContentType implements ContentType {
 			if (legs == null) throw new ParseException(id, "No leggings value specified");
 			KdlNode feet = nodes.get("boots");
 			if (feet == null) throw new ParseException(id, "No boots value specified");
+			KdlNode body = nodes.get("body");
+			if (body == null) throw new ParseException(id, "No body value specified");
 			ret.put(ArmorItem.Type.HELMET, KdlHelper.getArg(head, 0, 0));
 			ret.put(ArmorItem.Type.CHESTPLATE, KdlHelper.getArg(chest, 0, 0));
 			ret.put(ArmorItem.Type.LEGGINGS, KdlHelper.getArg(legs, 0, 0));
 			ret.put(ArmorItem.Type.BOOTS, KdlHelper.getArg(feet, 0, 0));
+			ret.put(ArmorItem.Type.BODY, KdlHelper.getArg(body, 0, 0));
 		} else {
 			ret.put(ArmorItem.Type.HELMET, KdlHelper.getProp(node, "helmet", 0));
 			ret.put(ArmorItem.Type.CHESTPLATE, KdlHelper.getProp(node, "chestplate", 0));
 			ret.put(ArmorItem.Type.LEGGINGS, KdlHelper.getProp(node, "leggings", 0));
 			ret.put(ArmorItem.Type.BOOTS, KdlHelper.getProp(node, "boots", 0));
+			ret.put(ArmorItem.Type.BODY, KdlHelper.getProp(node, "body", 0));
 		}
 		return ret;
 	}
