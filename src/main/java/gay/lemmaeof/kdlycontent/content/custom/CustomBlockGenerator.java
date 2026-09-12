@@ -1,18 +1,15 @@
 package gay.lemmaeof.kdlycontent.content.custom;
 
 import dev.kdl.KdlNode;
+import gay.lemmaeof.kdlycontent.util.Cuboid;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,16 +19,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 	public Block generateBlock(Identifier id, AbstractBlock.Settings settings, List<KdlNode> customConfig) throws ParseException {
 		CustomBlock.KdlyBlockProperties props = parseProperties(id, customConfig);
 
-		return new CustomBlock(settings, props) {
-			@Override
-			protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-				super.appendProperties(builder);
-				if (props.hasWaterlogged()) builder.add(Properties.WATERLOGGED);
-				if (props.rotProp() != RotationProperty.NONE) builder.add(props.rotProp().getProp());
-				if (props.functions().containsKey(BlockFunctionPoint.POWERED) || props.functions().containsKey(BlockFunctionPoint.UNPOWERED))
-					builder.add(Properties.POWERED);
-			}
-		};
+		return CustomBlock.create(settings, props);
 	}
 
 	//TODO: generify even more but this at least makes it much less painful to extend CustomBlock and such
@@ -39,7 +27,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 		boolean hasWaterlogged = false;
 		CustomBlock.RotationProperty rotationProp = CustomBlock.RotationProperty.NONE;
 		CustomBlock.PlacementRule placementRule = CustomBlock.PlacementRule.PLAYER;
-		VoxelShape defaultShape = VoxelShapes.empty();
+		List<Cuboid> defaultShape = new ArrayList<>();
 		Map<CustomBlock.BlockFunctionPoint, Identifier> functions = new HashMap<>();
 
 		Map<String, KdlNode> nodes = KdlHelper.mapNodes(customConfig);
@@ -64,7 +52,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 			List<KdlNode> shapeNodes = nodes.get("shape").children();
 			for (KdlNode shapeNode : shapeNodes) {
 				//TODO: enforce node name? not really anything you can do other than cuboids without Major hacks
-				defaultShape = VoxelShapes.union(defaultShape, Block.createCuboidShape(
+				defaultShape.add(new Cuboid(
 						KdlHelper.getProp(shapeNode, "minX", 0.0F),
 						KdlHelper.getProp(shapeNode, "minY", 0.0F),
 						KdlHelper.getProp(shapeNode, "minZ", 0.0F),

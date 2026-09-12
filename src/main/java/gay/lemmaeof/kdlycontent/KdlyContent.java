@@ -10,6 +10,7 @@ import gay.debuggy.staticdata.api.StaticDataItem;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.api.ParseException;
+import gay.lemmaeof.kdlycontent.content.custom.CustomBlock;
 import gay.lemmaeof.kdlycontent.content.type.ItemContentType;
 import gay.lemmaeof.kdlycontent.init.KdlyContentTypes;
 import gay.lemmaeof.kdlycontent.init.KdlyGenerators;
@@ -57,6 +58,7 @@ public class KdlyContent implements ModInitializer {
 				entries.add(item);
 			}
 		});
+		Registry.register(Registries.BLOCK_TYPE, Identifier.of(MODID, "custom"), CustomBlock.CODEC);
 
 		FabricLoader.getInstance().getEntrypoints("kdlycontent:before", Runnable.class).forEach(Runnable::run);
 		List<StaticDataItem> data = StaticData.getExactData(Identifier.of("", "kdlycontent.kdl"));
