@@ -55,12 +55,15 @@ public class ArmorMaterialContentType implements ContentType {
 
 		List<ArmorMaterial.Layer> layers = new ArrayList<>();
 		KdlNode layersNode = nodes.get("layers");
-		if (layersNode == null) throw new ParseException(id, "No layers specified");
-		for (KdlNode layerNode : layersNode.children()) {
-			Identifier layerId = Identifier.of(KdlHelper.getArg(layerNode, 0, ""));
-			String suffix = KdlHelper.getProp(layerNode, "suffix", "");
-			boolean dyeable = KdlHelper.getProp(layerNode, "dyeable", false);
-			layers.add(new ArmorMaterial.Layer(layerId, suffix, dyeable));
+		if (layersNode != null) {
+			for (KdlNode layerNode : layersNode.children()) {
+				Identifier layerId = Identifier.of(KdlHelper.getArg(layerNode, 0, ""));
+				String suffix = KdlHelper.getProp(layerNode, "suffix", "");
+				boolean dyeable = KdlHelper.getProp(layerNode, "dyeable", false);
+				layers.add(new ArmorMaterial.Layer(layerId, suffix, dyeable));
+			}
+		} else {
+			layers.add(new ArmorMaterial.Layer(id));
 		}
 
 		ArmorMaterial mat = new ArmorMaterial(protection, enchantability, equipSound, repairIng, layers, toughness, knockbackResistance);
