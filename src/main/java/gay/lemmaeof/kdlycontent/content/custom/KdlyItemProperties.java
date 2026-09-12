@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record KdlyItemProperties(Optional<BarProperties> bar, Optional<ChargeProperties> charge, boolean hasGlint,
-								 boolean selfRemainder, List<Text> lore, Map<ItemFunctionPoint, Identifier> functions) {
+public record KdlyItemProperties(Optional<BarProperties> bar, Optional<ChargeProperties> charge,
+								 boolean selfRemainder, Map<ItemFunctionPoint, Identifier> functions) {
 
+	//TODO: add bar component? put in kindly components maybe?
 	public record BarProperties(int barColor, String barTag, int barMax, boolean showWhenFull) {}
 
 	public record ChargeProperties(int minChargeDuration, int maxChargeDuration, UseAction action) {}

@@ -1,24 +1,23 @@
 package gay.lemmaeof.kdlycontent.content.type;
 
-import dev.hbeck.kdl.objects.KDLDocument;
-import dev.hbeck.kdl.objects.KDLNode;
-import dev.hbeck.kdl.objects.KDLString;
+import dev.kdl.KdlDocument;
+import dev.kdl.KdlNode;
 import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
-import org.quiltmc.loader.api.QuiltLoader;
 
 import java.util.Optional;
 
 public class ConditionalContentType extends KdlyContent implements ContentType {
 	@Override
-	public void generateFrom(Identifier id, KDLNode parent) throws ParseException {
+	public void generateFrom(Identifier id, KdlNode parent) throws ParseException {
 		//TODO: other conditions?
 		String mod = KdlHelper.getProp(parent, "mod", "");
-		if (mod.equals("") || QuiltLoader.isModLoaded(mod)) {
-			KDLDocument kdl = parent.getChild().orElse(new KDLDocument.Builder().build());
+		if (mod.equals("") || FabricLoader.getInstance().isModLoaded(mod)) {
+			KdlDocument kdl = new KdlDocument(parent.children());
 			parseKdl(id.getNamespace(), kdl);
 		}
 	}

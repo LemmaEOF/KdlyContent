@@ -1,27 +1,24 @@
 package gay.lemmaeof.kdlycontent.content.custom;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 
 public class CustomSwordItem extends SwordItem implements FunctionRunnable<KdlyItemProperties.ItemFunctionPoint> {
 	private final KdlyItemProperties props;
 
-	public CustomSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings, KdlyItemProperties props) {
-		super(toolMaterial, attackDamage, attackSpeed, settings);
+	public CustomSwordItem(ToolMaterial toolMaterial, Settings settings, KdlyItemProperties props) {
+		super(toolMaterial, settings);
 		this.props = props;
 	}
 
@@ -31,11 +28,11 @@ public class CustomSwordItem extends SwordItem implements FunctionRunnable<KdlyI
 	}
 
 	@Override
-	public int getMaxUseTime(ItemStack stack) {
+	public int getMaxUseTime(ItemStack stack, LivingEntity user) {
 		if (props.charge().isPresent()) {
 			return props.charge().get().maxChargeDuration();
 		}
-		return super.getMaxUseTime(stack);
+		return super.getMaxUseTime(stack, user);
 	}
 
 	@Override
@@ -86,7 +83,7 @@ public class CustomSwordItem extends SwordItem implements FunctionRunnable<KdlyI
 	public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
 		if (props.charge().isPresent()) {
 			KdlyItemProperties.ChargeProperties charge = props.charge().get();
-			if (getMaxUseTime(stack) - remainingUseTicks > charge.minChargeDuration()) {
+			if (getMaxUseTime(stack, user) - remainingUseTicks > charge.minChargeDuration()) {
 				runFunction(world, user.getPos(), user, KdlyItemProperties.ItemFunctionPoint.CHARGE_RELEASE);
 			}
 		}
@@ -111,8 +108,8 @@ public class CustomSwordItem extends SwordItem implements FunctionRunnable<KdlyI
 	public int getItemBarStep(ItemStack stack) {
 		if (props.bar().isPresent()) {
 			KdlyItemProperties.BarProperties bar = props.bar().get();
-			if (stack.hasNbt()) {
-				int value = stack.getNbt().getInt(bar.barTag());
+			if (stack.contains(DataComponentTypes.CUSTOM_DATA)) {
+				int value = stack.get(DataComponentTypes.CUSTOM_DATA).getNbt().getInt(bar.barTag());
 				int max = bar.barMax();
 				return Math.round(13.0F - (float) value * 13.0F / (float) max);
 			}
@@ -126,8 +123,8 @@ public class CustomSwordItem extends SwordItem implements FunctionRunnable<KdlyI
 		if (props.bar().isPresent()) {
 			KdlyItemProperties.BarProperties bar = props.bar().get();
 			if (bar.showWhenFull()) return true;
-			if (stack.hasNbt()) {
-				int value = stack.getNbt().getInt(bar.barTag());
+			if (stack.contains(DataComponentTypes.CUSTOM_DATA)) {
+				int value = stack.get(DataComponentTypes.CUSTOM_DATA).getNbt().getInt(bar.barTag());
 				int max = bar.barMax();
 				return value < max;
 			}
@@ -137,20 +134,8 @@ public class CustomSwordItem extends SwordItem implements FunctionRunnable<KdlyI
 	}
 
 	@Override
-	public boolean hasGlint(ItemStack stack) {
-		if (props.hasGlint()) return true;
-		return super.hasGlint(stack);
-	}
-
-	@Override
 	public ItemStack getRecipeRemainder(ItemStack stack) {
 		if (props.selfRemainder()) return stack;
 		return super.getRecipeRemainder(stack);
-	}
-
-	@Override
-	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-		super.appendTooltip(stack, world, tooltip, context);
-		tooltip.addAll(props.lore());
 	}
 }

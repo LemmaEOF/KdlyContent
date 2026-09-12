@@ -1,9 +1,10 @@
 package gay.lemmaeof.kdlycontent;
 
-import com.unascribed.lib39.core.api.ModPostInitializer;
-import dev.hbeck.kdl.objects.KDLDocument;
-import dev.hbeck.kdl.objects.KDLNode;
-import dev.hbeck.kdl.parse.KDLParser;
+import dev.kdl.KdlDocument;
+import dev.kdl.KdlNode;
+import dev.kdl.parse.Kdl2Parser;
+import dev.kdl.parse.KdlParseException;
+import dev.kdl.parse.KdlParser;
 import gay.debuggy.staticdata.api.StaticData;
 import gay.debuggy.staticdata.api.StaticDataItem;
 import gay.lemmaeof.kdlycontent.api.ContentType;
@@ -13,8 +14,10 @@ import gay.lemmaeof.kdlycontent.content.type.ItemContentType;
 import gay.lemmaeof.kdlycontent.init.KdlyContentTypes;
 import gay.lemmaeof.kdlycontent.init.KdlyGenerators;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -23,9 +26,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.quiltmc.loader.api.ModContainer;
-import org.quiltmc.loader.api.QuiltLoader;
-import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,40 +35,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class KdlyContent implements ModInitializer, ModPostInitializer {
+public class KdlyContent implements ModInitializer {
 	public static final String MODID = "kdlycontent";
 	public static final Logger LOGGER = LoggerFactory.getLogger("KdlyContent");
 
-	private static final KDLParser parser = new KDLParser();
+	private static final KdlParser parser = new Kdl2Parser();
 
-	public static final ItemGroup GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier(MODID, "generated"),
+	public static final ItemGroup GROUP = Registry.register(Registries.ITEM_GROUP, Identifier.of(MODID, "generated"),
 			FabricItemGroup.builder()
-					.name(Text.translatable("itemGroup.kdlycontent.generated"))
+					.displayName(Text.translatable("itemGroup.kdlycontent.generated"))
 					.icon(() -> new ItemStack(Items.CRAFTING_TABLE))
 					.build()
 	);
 
 	@Override
-	public void onInitialize(ModContainer mod) {
+	public void onInitialize() {
 		KdlyContentTypes.init();
 		KdlyGenerators.init();
 		ItemGroupEvents.MODIFY_ENTRIES_ALL.register((group, entries) -> {
 			for (Item item : ItemContentType.KDLY_ITEM_GROUPS.getOrDefault(group, new ArrayList<>())) {
-				entries.addItem(item);
+				entries.add(item);
 			}
 		});
-	}
 
-	@Override
-	public void onPostInitialize() {
-		QuiltLoader.getEntrypoints("kdlycontent:before", Runnable.class).forEach(Runnable::run);
-		List<StaticDataItem> data = StaticData.getExactData(new Identifier("", "kdlycontent.kdl"));
+		FabricLoader.getInstance().getEntrypoints("kdlycontent:before", Runnable.class).forEach(Runnable::run);
+		List<StaticDataItem> data = StaticData.getExactData(Identifier.of("", "kdlycontent.kdl"));
 		for (StaticDataItem item : data) {
 			String namespace = item.getModId();
 			try {
-				KDLDocument kdl = parser.parse(item.getAsStream());
+				KdlDocument kdl = parser.parse(item.getAsStream());
 				parseKdl(namespace, kdl);
-			} catch (IOException | ParseException e) {
+			} catch (IOException | ParseException | KdlParseException e) {
 				throw new RuntimeException("Could not load KDL for file " + item.getResourceId(), e);
 			}
 		}
@@ -83,40 +80,40 @@ public class KdlyContent implements ModInitializer, ModPostInitializer {
 			builder.append("and ").append(messages.get(messages.size() - 1));
 		}
 		LOGGER.info(builder.toString());
-		QuiltLoader.getEntrypoints("kdlycontent:after", Runnable.class).forEach(Runnable::run);
+		FabricLoader.getInstance().getEntrypoints("kdlycontent:after", Runnable.class).forEach(Runnable::run);
 	}
 
 	//TODO: template overrides and such
 	//TODO: oh god this method is a nightmare
-	protected void parseKdl(String namespace, KDLDocument kdl) {
-		Map<ContentType, Map<Identifier, KDLNode>> templates = new HashMap<>();
-		for (KDLNode node : kdl.getNodes()) {
-			Identifier id = new Identifier(namespace, "anonymous");
-			String typeName = toSnakeCase(node.getIdentifier());
+	protected void parseKdl(String namespace, KdlDocument kdl) {
+		Map<ContentType, Map<Identifier, KdlNode>> templates = new HashMap<>();
+		for (KdlNode node : kdl.nodes()) {
+			Identifier id = Identifier.of(namespace, "anonymous");
+			String typeName = toSnakeCase(node.name());
 			if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
-			Identifier typeId = new Identifier(typeName);
+			Identifier typeId = Identifier.of(typeName);
 			if (KdlyRegistries.CONTENT_TYPES.containsId(typeId)) {
 				ContentType type = KdlyRegistries.CONTENT_TYPES.get(typeId);
-				if (node.getType().isPresent() && node.getType().get().equals("template")) {
-					id = new Identifier(KdlHelper.getArg(node, 0, "anonymous"));
+				if (node.type() != null && node.type().equals("template")) {
+					id = Identifier.of(KdlHelper.getArg(node, 0, "anonymous"));
 					templates.computeIfAbsent(type, t -> new HashMap<>()).put(id, node);
 				} else {
 					if (type.needsIdentifier()) {
 						String name = KdlHelper.getArg(node, 0, "anonymous");
-						id = new Identifier(namespace, name);
+						id = Identifier.of(namespace, name);
 					}
-					if (node.getProps().containsKey("template")) {
-						Identifier templateId = new Identifier(KdlHelper.getProp(node, "template", ""));
+					if (node.properties().hasProperty("template")) {
+						Identifier templateId = Identifier.of(KdlHelper.getProp(node, "template", ""));
 						if (templates.containsKey(type)) {
-							Map<Identifier, KDLNode> typeTemplates = templates.get(type);
+							Map<Identifier, KdlNode> typeTemplates = templates.get(type);
 							if (typeTemplates.containsKey(templateId)) {
-								KDLNode template = typeTemplates.get(templateId);
+								KdlNode template = typeTemplates.get(templateId);
 								type.generateFrom(id, template);
 							} else {
-								throw new ParseException(id, "No template named `" + templateId + "` for content type `" + node.getIdentifier() + "` (converted to `" + typeId + "`)");
+								throw new ParseException(id, "No template named `" + templateId + "` for content type `" + node.name() + "` (converted to `" + typeId + "`)");
 							}
 						} else {
-							throw new ParseException(id, "No templates for content type `" + node.getIdentifier() + "` found (converted to `" + typeId + "`)");
+							throw new ParseException(id, "No templates for content type `" + node.name() + "` found (converted to `" + typeId + "`)");
 						}
 					} else {
 						//TODO: multiple IDs for quick-instantiation
@@ -124,7 +121,7 @@ public class KdlyContent implements ModInitializer, ModPostInitializer {
 					}
 				}
 			} else {
-				throw new ParseException(id, "Content type `" + node.getIdentifier() + "` not found (converted to `" + typeId + "`)");
+				throw new ParseException(id, "Content type `" + node.name() + "` not found (converted to `" + typeId + "`)");
 			}
 		}
 	}

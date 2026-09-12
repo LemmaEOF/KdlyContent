@@ -1,6 +1,6 @@
 package gay.lemmaeof.kdlycontent.content.custom;
 
-import com.unascribed.lib39.core.api.util.LatchReference;
+import gay.lemmaeof.kdlycontent.util.LatchReference;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.function.CommandFunction;
@@ -22,16 +22,16 @@ public interface FunctionRunnable<T> {
 
 	default boolean runFunction(World world, Vec3d pos, @Nullable Entity user, T point) {
 		if (!world.isClient) {
-			LatchReference<Integer> latch = LatchReference.empty();
+			LatchReference<Boolean> latch = LatchReference.empty();
 			Identifier functionId = getFunctions().get(point);
 			if (functionId != null) {
-				Optional<CommandFunction> funcOpt = world.getServer().getCommandFunctionManager().getFunction(functionId);
+				Optional<CommandFunction<ServerCommandSource>> funcOpt = world.getServer().getCommandFunctionManager().getFunction(functionId);
 				if (funcOpt.isPresent()) {
-					CommandFunction func = funcOpt.get();
+					CommandFunction<ServerCommandSource> func = funcOpt.get();
 					ServerCommandSource src = user != null? user.getCommandSource() : world.getServer().getCommandSource();
-					src = src.withPosition(pos).withLevel(2).withSilent().method_51411(latch::set);
+					src = src.withPosition(pos).withLevel(2).withSilent().withReturnValueConsumer((success, code) -> latch.set(success));
 					world.getServer().getCommandFunctionManager().execute(func, src);
-					if (latch.isPresent()) return latch.get() != 0;
+					if (latch.isPresent()) return latch.get();
 					else return true;
 				}
 			}

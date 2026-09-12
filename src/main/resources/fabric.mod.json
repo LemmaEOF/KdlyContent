@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+  "group": "gay.lemmaeof",
+  "id": "kdlycontent",
+  "version": "${version}",
+  "name": "Kdly Content",
+  "description": "A system for writing simple blocks and items in kdl",
+  "authors": ["LemmaEOF"],
+  "contact": {
+    "homepage": "https://lemmaeof.gay/",
+    "issues": "https://github.com/LemmaEOF/KdlyContent/issues",
+    "sources": "https://github.com/LemmaEOF/KdlyContent"
+  },
+  "icon": "assets/kdlycontent/icon.png",
+  "entrypoints": {
+    "main": ["gay.lemmaeof.kdlycontent.KdlyContent"],
+    "client": ["gay.lemmaeof.kdlycontent.client.KdlyContentClient"]
+  },
+  "mixins": [
+    "kdlycontent.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "fabric-api": "*",
+    "minecraft": "=1.21.1",
+    "staticdata": "*"
+  }
+}

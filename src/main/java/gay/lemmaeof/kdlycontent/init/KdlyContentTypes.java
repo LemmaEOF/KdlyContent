@@ -16,7 +16,7 @@ public class KdlyContentTypes {
 	public static final ContentType REQUIRE = register("require", new ConditionalContentType());
 
 	private static ContentType register(String name, ContentType type) {
-		return Registry.register(KdlyRegistries.CONTENT_TYPES, new Identifier(KdlyContent.MODID, name), type);
+		return Registry.register(KdlyRegistries.CONTENT_TYPES, Identifier.of(KdlyContent.MODID, name), type);
 	}
 
 	public static void init() {}

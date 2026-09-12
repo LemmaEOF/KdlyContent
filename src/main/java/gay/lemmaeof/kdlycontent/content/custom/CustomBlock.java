@@ -17,7 +17,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.random.RandomGenerator;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
@@ -36,12 +36,12 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 		this.props = props;
 		for (BlockState state : this.getStateManager().getStates()) {
 			switch (props.rotProp) {
-				case AXIS -> shapes.put(state, switch ((Direction.Axis) state.get(props.rotProp.prop)) {
+				case AXIS -> shapes.put(state, switch ((Direction.Axis) (Object) state.get(props.rotProp.prop)) {
 					case X -> VoxelMath.rotateZ(props.defaultShape);
 					case Y -> props.defaultShape;
 					case Z -> VoxelMath.rotateX(props.defaultShape);
 				});
-				case HORIZONTAL_AXIS -> shapes.put(state, state.get(props.rotProp.prop) == Direction.Axis.X?
+				case HORIZONTAL_AXIS -> shapes.put(state, (Object) state.get(props.rotProp.prop) == Direction.Axis.X?
 						props.defaultShape : VoxelMath.rotate(90, props.defaultShape));
 				case FACING, VERTICAL_DIRECTION -> shapes.put(state, switch ((Direction) state.get(props.rotProp.prop)) {
 					case NORTH -> VoxelMath.rotateX(props.defaultShape);
@@ -79,11 +79,11 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 			case HORIZONTAL_AXIS: switch (props.placement) {
 				case SIDE, OPPOSITE_SIDE -> {
 					if (ctx.getSide().getAxis() == Direction.Axis.Y)
-						return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerFacing().getAxis());
+						return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerLookDirection().getAxis());
 					return base.with(Properties.HORIZONTAL_AXIS, ctx.getSide().getAxis());
 				}
 				case PLAYER, OPPOSITE_PLAYER -> {
-					return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerFacing().getAxis());
+					return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerLookDirection().getAxis());
 				}
 			}
 			case FACING: return switch(props.placement) {
@@ -95,19 +95,19 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 			case HORIZONTAL_FACING: switch(props.placement) {
 				case SIDE -> {
 					if (ctx.getSide().getAxis() == Direction.Axis.Y)
-						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing());
+						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection());
 					return base.with(Properties.HORIZONTAL_FACING, ctx.getSide());
 				}
 				case OPPOSITE_SIDE -> {
 					if (ctx.getSide().getAxis() == Direction.Axis.Y)
-						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite());
+						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection().getOpposite());
 					return base.with(Properties.HORIZONTAL_FACING, ctx.getSide().getOpposite());
 				}
 				case PLAYER -> {
-					return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing());
+					return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection());
 				}
 				case OPPOSITE_PLAYER -> {
-					return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite());
+					return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection().getOpposite());
 				}
 			}
 			case HOPPER_FACING: switch (props.placement) {
@@ -171,7 +171,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 	}
 
 	@Override
-	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, RandomGenerator random) {
+	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
 		if (state.contains(POWERED)) {
 			if (state.get(POWERED)) {
 				this.runFunction(world, pos, null, BlockFunctionPoint.POWERED);
@@ -208,7 +208,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 			}
 			case AXIS, HORIZONTAL_AXIS -> {
 				if (rotation == BlockRotation.CLOCKWISE_90 || rotation == BlockRotation.COUNTERCLOCKWISE_90) {
-					return switch ((Direction.Axis) state.get(props.rotProp.prop)) {
+					return switch ((Direction.Axis) (Object) state.get(props.rotProp.prop)) {
 						case X -> base.with((EnumProperty<Direction.Axis>) props.rotProp.prop, Direction.Axis.Z);
 						case Z -> base.with((EnumProperty<Direction.Axis>) props.rotProp.prop, Direction.Axis.X);
 						default -> base;
@@ -250,10 +250,12 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 		runFunction(world, pos, placer, BlockFunctionPoint.PLACED);
 	}
 
+
 	@Override
-	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		super.onBreak(world, pos, state, player);
+	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+		BlockState res = super.onBreak(world, pos, state, player);
 		runFunction(world, pos, player, BlockFunctionPoint.BROKEN);
+		return res;
 	}
 
 	@Override
@@ -263,10 +265,17 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		super.onUse(state, world, pos, player, hand, hit);
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+		super.onUse(state, world, pos, player, hit);
 		if (runFunction(world, pos, player, BlockFunctionPoint.USED)) return ActionResult.SUCCESS;
 		else return ActionResult.PASS;
+	}
+
+	@Override
+	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+		if (runFunction(world, pos, player, BlockFunctionPoint.USED)) return ItemActionResult.SUCCESS;
+		else return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 	}
 
 	@Override

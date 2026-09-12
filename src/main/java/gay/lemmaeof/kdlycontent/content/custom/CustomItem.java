@@ -1,25 +1,22 @@
 package gay.lemmaeof.kdlycontent.content.custom;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 
 public class CustomItem extends Item implements FunctionRunnable<KdlyItemProperties.ItemFunctionPoint> {
 	private final KdlyItemProperties props;
 
-	public CustomItem(Settings settings, KdlyItemProperties props) {
+	public CustomItem(Item.Settings settings, KdlyItemProperties props) {
 		super(settings);
 		this.props = props;
 	}
@@ -30,11 +27,11 @@ public class CustomItem extends Item implements FunctionRunnable<KdlyItemPropert
 	}
 
 	@Override
-	public int getMaxUseTime(ItemStack stack) {
+	public int getMaxUseTime(ItemStack stack, LivingEntity user) {
 		if (props.charge().isPresent()) {
 			return props.charge().get().maxChargeDuration();
 		}
-		return super.getMaxUseTime(stack);
+		return super.getMaxUseTime(stack, user);
 	}
 
 	@Override
@@ -85,7 +82,7 @@ public class CustomItem extends Item implements FunctionRunnable<KdlyItemPropert
 	public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
 		if (props.charge().isPresent()) {
 			KdlyItemProperties.ChargeProperties charge = props.charge().get();
-			if (getMaxUseTime(stack) - remainingUseTicks > charge.minChargeDuration()) {
+			if (getMaxUseTime(stack, user) - remainingUseTicks > charge.minChargeDuration()) {
 				runFunction(world, user.getPos(), user, KdlyItemProperties.ItemFunctionPoint.CHARGE_RELEASE);
 			}
 		}
@@ -110,8 +107,8 @@ public class CustomItem extends Item implements FunctionRunnable<KdlyItemPropert
 	public int getItemBarStep(ItemStack stack) {
 		if (props.bar().isPresent()) {
 			KdlyItemProperties.BarProperties bar = props.bar().get();
-			if (stack.hasNbt()) {
-				int value = stack.getNbt().getInt(bar.barTag());
+			if (stack.contains(DataComponentTypes.CUSTOM_DATA)) {
+				int value = stack.get(DataComponentTypes.CUSTOM_DATA).getNbt().getInt(bar.barTag());
 				int max = bar.barMax();
 				return Math.round(13.0F - (float) value * 13.0F / (float) max);
 			}
@@ -125,8 +122,8 @@ public class CustomItem extends Item implements FunctionRunnable<KdlyItemPropert
 		if (props.bar().isPresent()) {
 			KdlyItemProperties.BarProperties bar = props.bar().get();
 			if (bar.showWhenFull()) return true;
-			if (stack.hasNbt()) {
-				int value = stack.getNbt().getInt(bar.barTag());
+			if (stack.contains(DataComponentTypes.CUSTOM_DATA)) {
+				int value = stack.get(DataComponentTypes.CUSTOM_DATA).getNbt().getInt(bar.barTag());
 				int max = bar.barMax();
 				return value < max;
 			}
@@ -136,20 +133,8 @@ public class CustomItem extends Item implements FunctionRunnable<KdlyItemPropert
 	}
 
 	@Override
-	public boolean hasGlint(ItemStack stack) {
-		if (props.hasGlint()) return true;
-		return super.hasGlint(stack);
-	}
-
-	@Override
 	public ItemStack getRecipeRemainder(ItemStack stack) {
 		if (props.selfRemainder()) return stack;
 		return super.getRecipeRemainder(stack);
-	}
-
-	@Override
-	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-		super.appendTooltip(stack, world, tooltip, context);
-		tooltip.addAll(props.lore());
 	}
 }

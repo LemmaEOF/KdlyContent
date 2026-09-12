@@ -1,10 +1,10 @@
 package gay.lemmaeof.kdlycontent.content.custom;
 
-import dev.hbeck.kdl.objects.KDLDocument;
-import dev.hbeck.kdl.objects.KDLNode;
+import dev.kdl.KdlNode;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ParseException;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
@@ -12,7 +12,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.Map;
 
 public class CustomBlockGenerator implements BlockGenerator {
 	@Override
-	public Block generateBlock(Identifier id, QuiltBlockSettings settings, List<KDLNode> customConfig) throws ParseException {
+	public Block generateBlock(Identifier id, AbstractBlock.Settings settings, List<KdlNode> customConfig) throws ParseException {
 		CustomBlock.KdlyBlockProperties props = parseProperties(id, customConfig);
 
 		return new CustomBlock(settings, props) {
@@ -36,23 +35,23 @@ public class CustomBlockGenerator implements BlockGenerator {
 	}
 
 	//TODO: generify even more but this at least makes it much less painful to extend CustomBlock and such
-	protected CustomBlock.KdlyBlockProperties parseProperties(Identifier id, List<KDLNode> customConfig) {
+	protected CustomBlock.KdlyBlockProperties parseProperties(Identifier id, List<KdlNode> customConfig) {
 		boolean hasWaterlogged = false;
 		CustomBlock.RotationProperty rotationProp = CustomBlock.RotationProperty.NONE;
 		CustomBlock.PlacementRule placementRule = CustomBlock.PlacementRule.PLAYER;
 		VoxelShape defaultShape = VoxelShapes.empty();
 		Map<CustomBlock.BlockFunctionPoint, Identifier> functions = new HashMap<>();
 
-		Map<String, KDLNode> nodes = KdlHelper.mapNodes(customConfig);
+		Map<String, KdlNode> nodes = KdlHelper.mapNodes(customConfig);
 
 		if (nodes.containsKey("properties")) {
-			Map<String, KDLNode> propNodes = KdlHelper.mapNodes(nodes.get("properties").getChild().orElse(new KDLDocument.Builder().build()).getNodes());
+			Map<String, KdlNode> propNodes = KdlHelper.mapNodes(nodes.get("properties").children());
 			if (propNodes.containsKey("waterloggable")) hasWaterlogged = true;
 			if (propNodes.containsKey("rotation")) {
-				KDLNode rotNode = propNodes.get("rotation");
+				KdlNode rotNode = propNodes.get("rotation");
 				try {
 					rotationProp = CustomBlock.RotationProperty.forName(KdlHelper.getProp(rotNode, "type", "facing"));
-					if (rotNode.getProps().containsKey("placement")) {
+					if (rotNode.properties().hasProperty("placement")) {
 						placementRule = CustomBlock.PlacementRule.forName(KdlHelper.getProp(rotNode, "placement", "side"));
 					}
 				} catch (IllegalArgumentException e) {
@@ -62,8 +61,8 @@ public class CustomBlockGenerator implements BlockGenerator {
 		}
 
 		if (nodes.containsKey("shape")) {
-			List<KDLNode> shapeNodes = nodes.get("shape").getChild().orElse(new KDLDocument.Builder().build()).getNodes();
-			for (KDLNode shapeNode : shapeNodes) {
+			List<KdlNode> shapeNodes = nodes.get("shape").children();
+			for (KdlNode shapeNode : shapeNodes) {
 				//TODO: enforce node name? not really anything you can do other than cuboids without Major hacks
 				defaultShape = VoxelShapes.union(defaultShape, Block.createCuboidShape(
 						KdlHelper.getProp(shapeNode, "minX", 0.0F),
@@ -77,12 +76,12 @@ public class CustomBlockGenerator implements BlockGenerator {
 		}
 
 		if (nodes.containsKey("functions")) {
-			Map<String, KDLNode> funcNodes = KdlHelper.mapNodes(nodes.get("functions").getChild().orElse(new KDLDocument.Builder().build()).getNodes());
+			Map<String, KdlNode> funcNodes = KdlHelper.mapNodes(nodes.get("functions").children());
 			for (String str : funcNodes.keySet()) {
-				KDLNode node = funcNodes.get(str);
+				KdlNode node = funcNodes.get(str);
 				try {
 					CustomBlock.BlockFunctionPoint point = CustomBlock.BlockFunctionPoint.forName(str);
-					functions.put(point, new Identifier(KdlHelper.getArg(node, 0, "")));
+					functions.put(point, Identifier.of(KdlHelper.getArg(node, 0, "")));
 				} catch (IllegalArgumentException e) {
 					throw new ParseException(id, e.getMessage());
 				}

@@ -1,23 +1,21 @@
 package gay.lemmaeof.kdlycontent.client;
 
-import com.unascribed.lib39.core.api.ClientModPostInitializer;
 import gay.lemmaeof.kdlycontent.content.type.BlockContentType;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.block.Block;
 import net.minecraft.client.render.RenderLayer;
-import org.quiltmc.loader.api.ModContainer;
-import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
-import org.quiltmc.qsl.block.extensions.api.client.BlockRenderLayerMap;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class KdlyContentClient implements ClientModPostInitializer {
+public class KdlyContentClient implements ClientModInitializer {
 	public static final Map<String, RenderLayer> RENDER_LAYERS = new HashMap<>();
 
 	@Override
-	public void onPostInitializeClient() {
+	public void onInitializeClient() {
 		for (Block block : BlockContentType.KDLY_RENDER_LAYERS.keySet()) {
-			BlockRenderLayerMap.put(RENDER_LAYERS.get(BlockContentType.KDLY_RENDER_LAYERS.get(block)), block);
+			BlockRenderLayerMap.INSTANCE.putBlock(block, RENDER_LAYERS.get(BlockContentType.KDLY_RENDER_LAYERS.get(block)));
 		}
 	}
 

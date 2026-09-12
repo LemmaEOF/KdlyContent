@@ -2,6 +2,7 @@ package gay.lemmaeof.kdlycontent.content.custom;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Waterloggable;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -12,13 +13,14 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public interface MaybeWaterloggable extends Waterloggable {
 
 	@Override
-	default boolean canFillWithFluid(BlockView world, BlockPos pos, BlockState state, Fluid fluid) {
+	default boolean canFillWithFluid(@Nullable PlayerEntity player, BlockView world, BlockPos pos, BlockState state, Fluid fluid) {
 		return state.contains(Properties.WATERLOGGED) && !state.get(Properties.WATERLOGGED) && fluid == Fluids.WATER;
 	}
 
@@ -32,9 +34,9 @@ public interface MaybeWaterloggable extends Waterloggable {
 	}
 
 	@Override
-	default ItemStack tryDrainFluid(WorldAccess world, BlockPos pos, BlockState state) {
+	default ItemStack tryDrainFluid(@Nullable PlayerEntity player, WorldAccess world, BlockPos pos, BlockState state) {
 		if (state.contains(Properties.WATERLOGGED)) {
-			return Waterloggable.super.tryDrainFluid(world, pos, state);
+			return Waterloggable.super.tryDrainFluid(player, world, pos, state);
 		} else {
 			return ItemStack.EMPTY;
 		}
