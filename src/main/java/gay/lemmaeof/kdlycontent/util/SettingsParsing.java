@@ -23,7 +23,6 @@ public class SettingsParsing {
 		if (parent.properties().hasProperty("copy")) {
 			Identifier copyId = Identifier.of(KdlHelper.getProp(parent, "copy", ""));
 			Block copyBlock = Registries.BLOCK.get(copyId);
-			KdlyContent.LOGGER.info("Block {} copying from {} ({})", id, copyId, copyBlock);
 			settings = AbstractBlock.Settings.copy(copyBlock);
 		} else {
 			settings = AbstractBlock.Settings.create();

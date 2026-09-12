@@ -3,6 +3,7 @@ package gay.lemmaeof.kdlycontent.content.custom;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.util.VoxelMath;
 import gay.lemmaeof.kdlycontent.util.Cuboid;
 import net.minecraft.block.Block;
@@ -37,49 +38,40 @@ import java.util.Map;
 public abstract class CustomBlock extends Block implements MaybeWaterloggable, FunctionRunnable<CustomBlock.BlockFunctionPoint> {
 	public static final MapCodec<CustomBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		createSettingsCodec(),
-		Codec.BOOL.optionalFieldOf("waterloggable", false).forGetter(CustomBlock::waterloggable),
-		RotationProperty.CODEC.optionalFieldOf("rotation", RotationProperty.NONE).forGetter(CustomBlock::rotationProperty),
-		PlacementRule.CODEC.optionalFieldOf("placement", PlacementRule.SIDE).forGetter(CustomBlock::placement),
-		Cuboid.CODEC.listOf().optionalFieldOf("shape", List.of(Cuboid.FULL)).forGetter(CustomBlock::defaultShape),
-		Codec.unboundedMap(BlockFunctionPoint.CODEC, Identifier.CODEC).optionalFieldOf("functions", Map.of()).forGetter(CustomBlock::functions)
+		KdlyBlockBehaviors.CODEC.fieldOf("behaviors").forGetter(CustomBlock::behaviors)
 	).apply(instance, CustomBlock::create));
 
 	private static final BooleanProperty POWERED = Properties.POWERED;
-	private final KdlyBlockProperties props;
+	private final KdlyBlockBehaviors behaviors;
 	private final Map<BlockState, VoxelShape> shapes = new HashMap<>();
 
-	public static CustomBlock create(Settings settings, boolean waterloggable, RotationProperty rotProp, PlacementRule placement, List<Cuboid> defaultShape, Map<BlockFunctionPoint, Identifier> functions) {
-		KdlyBlockProperties props = new KdlyBlockProperties(waterloggable, rotProp, placement, defaultShape, functions);
-		return create(settings, props);
-	}
-
-	public static CustomBlock create(Settings settings, KdlyBlockProperties props) {
-		return new CustomBlock(settings, props) {
+	public static CustomBlock create(Settings settings, KdlyBlockBehaviors behaviors) {
+		return new CustomBlock(settings, behaviors) {
 			@Override
 			protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 				super.appendProperties(builder);
-				if (props.hasWaterlogged()) builder.add(Properties.WATERLOGGED);
-				if (props.rotProp() != RotationProperty.NONE) builder.add(props.rotProp().getProp());
-				if (props.functions().containsKey(BlockFunctionPoint.POWERED) || props.functions().containsKey(BlockFunctionPoint.UNPOWERED))
+				if (behaviors.hasWaterlogged()) builder.add(Properties.WATERLOGGED);
+				if (behaviors.rotProp() != RotationProperty.NONE) builder.add(behaviors.rotProp().getProp());
+				if (behaviors.functions().containsKey(BlockFunctionPoint.POWERED) || behaviors.functions().containsKey(BlockFunctionPoint.UNPOWERED))
 					builder.add(Properties.POWERED);
 			}
 		};
 	}
 
-	public CustomBlock(Settings settings, KdlyBlockProperties props) {
+	public CustomBlock(Settings settings, KdlyBlockBehaviors behaviors) {
 		super(settings);
-		this.props = props;
-		VoxelShape defaultShape = props.getShape();
+		this.behaviors = behaviors;
+		VoxelShape defaultShape = behaviors.getShape();
 		for (BlockState state : this.getStateManager().getStates()) {
-			switch (props.rotProp) {
-				case AXIS -> shapes.put(state, switch ((Direction.Axis) (Object) state.get(props.rotProp.prop)) {
+			switch (behaviors.rotProp) {
+				case AXIS -> shapes.put(state, switch ((Direction.Axis) (Object) state.get(behaviors.rotProp.prop)) {
 					case X -> VoxelMath.rotateZ(defaultShape);
 					case Y -> defaultShape;
 					case Z -> VoxelMath.rotateX(defaultShape);
 				});
-				case HORIZONTAL_AXIS -> shapes.put(state, (Object) state.get(props.rotProp.prop) == Direction.Axis.X?
+				case HORIZONTAL_AXIS -> shapes.put(state, (Object) state.get(behaviors.rotProp.prop) == Direction.Axis.X?
 					defaultShape : VoxelMath.rotate(90, defaultShape));
-				case FACING, VERTICAL_DIRECTION -> shapes.put(state, switch ((Direction) state.get(props.rotProp.prop)) {
+				case FACING, VERTICAL_DIRECTION -> shapes.put(state, switch ((Direction) state.get(behaviors.rotProp.prop)) {
 					case NORTH -> VoxelMath.rotateX(defaultShape);
 					case SOUTH -> VoxelMath.rotate(180, VoxelMath.rotateX(defaultShape));
 					case EAST -> VoxelMath.rotate(270, VoxelMath.rotateX(defaultShape));
@@ -87,7 +79,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 					case UP -> defaultShape;
 					case DOWN -> VoxelMath.rotateX(VoxelMath.rotateX(defaultShape));
 				});
-				case HORIZONTAL_FACING, HOPPER_FACING -> shapes.put(state, switch ((Direction) state.get(props.rotProp.prop)) {
+				case HORIZONTAL_FACING, HOPPER_FACING -> shapes.put(state, switch ((Direction) state.get(behaviors.rotProp.prop)) {
 					case NORTH, UP -> defaultShape; //up should never happen here so this should be fine
 					case SOUTH -> VoxelMath.rotate(180, defaultShape);
 					case EAST -> VoxelMath.rotate(270, defaultShape);
@@ -99,24 +91,8 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 		}
 	}
 
-	public boolean waterloggable() {
-		return props.hasWaterlogged;
-	}
-
-	public RotationProperty rotationProperty() {
-		return props.rotProp;
-	}
-
-	public PlacementRule placement() {
-		return props.placement;
-	}
-
-	public List<Cuboid> defaultShape() {
-		return props.defaultShape;
-	}
-
-	public Map<BlockFunctionPoint, Identifier> functions() {
-		return props.functions;
+	public KdlyBlockBehaviors behaviors() {
+		return this.behaviors;
 	}
 
 	@Override
@@ -132,12 +108,12 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 		if (base.contains(Properties.WATERLOGGED)) {
 			base = base.with(Properties.WATERLOGGED, ctx.getWorld().getFluidState(ctx.getBlockPos()).getFluid() == Fluids.WATER);
 		}
-		switch (props.rotProp) {
-			case AXIS: return switch (props.placement) {
+		switch (behaviors.rotProp) {
+			case AXIS: return switch (behaviors.placement) {
 				case SIDE, OPPOSITE_SIDE -> base.with(Properties.AXIS, ctx.getSide().getAxis());
 				case PLAYER, OPPOSITE_PLAYER -> base.with(Properties.AXIS, ctx.getPlayerLookDirection().getAxis());
 			};
-			case HORIZONTAL_AXIS: switch (props.placement) {
+			case HORIZONTAL_AXIS: switch (behaviors.placement) {
 				case SIDE, OPPOSITE_SIDE -> {
 					if (ctx.getSide().getAxis() == Direction.Axis.Y)
 						return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerLookDirection().getAxis());
@@ -147,31 +123,31 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 					return base.with(Properties.HORIZONTAL_AXIS, ctx.getPlayerLookDirection().getAxis());
 				}
 			}
-			case FACING: return switch(props.placement) {
+			case FACING: return switch(behaviors.placement) {
 				case SIDE -> base.with(Properties.FACING, ctx.getSide());
 				case OPPOSITE_SIDE -> base.with(Properties.FACING, ctx.getSide().getOpposite());
 				case PLAYER -> base.with(Properties.FACING, ctx.getPlayerLookDirection());
 				case OPPOSITE_PLAYER -> base.with(Properties.FACING, ctx.getPlayerLookDirection().getOpposite());
 			};
-			case HORIZONTAL_FACING: switch(props.placement) {
+			case HORIZONTAL_FACING: switch(behaviors.placement) {
 				case SIDE -> {
 					if (ctx.getSide().getAxis() == Direction.Axis.Y)
-						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection());
+						return base.with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing());
 					return base.with(Properties.HORIZONTAL_FACING, ctx.getSide());
 				}
 				case OPPOSITE_SIDE -> {
 					if (ctx.getSide().getAxis() == Direction.Axis.Y)
-						return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection().getOpposite());
+						return base.with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 					return base.with(Properties.HORIZONTAL_FACING, ctx.getSide().getOpposite());
 				}
 				case PLAYER -> {
-					return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection());
+					return base.with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing());
 				}
 				case OPPOSITE_PLAYER -> {
-					return base.with(Properties.HORIZONTAL_FACING, ctx.getPlayerLookDirection().getOpposite());
+					return base.with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 				}
 			}
-			case HOPPER_FACING: switch (props.placement) {
+			case HOPPER_FACING: switch (behaviors.placement) {
 				case SIDE -> {
 					if (ctx.getSide() == Direction.UP)
 						return base.with(Properties.HOPPER_FACING, Direction.DOWN);
@@ -193,7 +169,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 					return base.with(Properties.HOPPER_FACING, ctx.getPlayerLookDirection().getOpposite());
 				}
 			}
-			case VERTICAL_DIRECTION: switch (props.placement) {
+			case VERTICAL_DIRECTION: switch (behaviors.placement) {
 				case SIDE -> {
 					if (ctx.getSide().getAxis() != Direction.Axis.Y)
 						return base.with(Properties.VERTICAL_DIRECTION, ctx.getHitPos().y - (double)ctx.getBlockPos().getY() > 0.5? Direction.UP : Direction.DOWN);
@@ -263,15 +239,15 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
 		BlockState base = super.rotate(state, rotation);
-		switch (props.rotProp) {
+		switch (behaviors.rotProp) {
 			case FACING, HORIZONTAL_FACING, HOPPER_FACING -> {
-				return base.with((DirectionProperty) props.rotProp.prop, rotation.rotate((Direction) state.get(props.rotProp.prop)));
+				return base.with((DirectionProperty) behaviors.rotProp.prop, rotation.rotate((Direction) state.get(behaviors.rotProp.prop)));
 			}
 			case AXIS, HORIZONTAL_AXIS -> {
 				if (rotation == BlockRotation.CLOCKWISE_90 || rotation == BlockRotation.COUNTERCLOCKWISE_90) {
-					return switch ((Direction.Axis) (Object) state.get(props.rotProp.prop)) {
-						case X -> base.with((EnumProperty<Direction.Axis>) props.rotProp.prop, Direction.Axis.Z);
-						case Z -> base.with((EnumProperty<Direction.Axis>) props.rotProp.prop, Direction.Axis.X);
+					return switch ((Direction.Axis) (Object) state.get(behaviors.rotProp.prop)) {
+						case X -> base.with((EnumProperty<Direction.Axis>) behaviors.rotProp.getProp(), Direction.Axis.Z);
+						case Z -> base.with((EnumProperty<Direction.Axis>) behaviors.rotProp.getProp(), Direction.Axis.X);
 						default -> base;
 					};
 				} else {
@@ -287,11 +263,11 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
 		BlockState base = super.mirror(state, mirror);
-		switch (props.rotProp) {
+		switch (behaviors.rotProp) {
 			case FACING, HORIZONTAL_FACING, HOPPER_FACING -> {
-				Direction dir = (Direction) base.get(props.rotProp.prop);
+				Direction dir = (Direction) base.get(behaviors.rotProp.prop);
 				if (dir.getAxis() == Direction.Axis.Y) return base;
-				return base.with((DirectionProperty) props.rotProp.prop, mirror.apply(dir));
+				return base.with((DirectionProperty) behaviors.rotProp.prop, mirror.apply(dir));
 			}
 			default -> {
 				//mirroring is only for horizontal axes, so vertical direction, axis, and no rot prop stay the same
@@ -302,7 +278,7 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 
 	@Override
 	public Map<BlockFunctionPoint, Identifier> getFunctions() {
-		return props.functions;
+		return behaviors.functions;
 	}
 
 	@Override
@@ -355,9 +331,15 @@ public abstract class CustomBlock extends Block implements MaybeWaterloggable, F
 		return shapes.get(state);
 	}
 
-	public record KdlyBlockProperties(boolean hasWaterlogged, RotationProperty rotProp, PlacementRule placement,
-									  List<Cuboid> defaultShape, Map<BlockFunctionPoint, Identifier> functions) {
-		public static final Codec<KdlyBlockProperties> CODEC = null;
+	public record KdlyBlockBehaviors(boolean hasWaterlogged, RotationProperty rotProp, PlacementRule placement,
+									 List<Cuboid> defaultShape, Map<BlockFunctionPoint, Identifier> functions) {
+		public static final Codec<KdlyBlockBehaviors> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.BOOL.optionalFieldOf("waterloggable", false).forGetter(KdlyBlockBehaviors::hasWaterlogged),
+			RotationProperty.CODEC.optionalFieldOf("rotation", RotationProperty.NONE).forGetter(KdlyBlockBehaviors::rotProp),
+			PlacementRule.CODEC.optionalFieldOf("placement", PlacementRule.PLAYER).forGetter(KdlyBlockBehaviors::placement),
+			Cuboid.CODEC.listOf().optionalFieldOf("shape", List.of(Cuboid.FULL)).forGetter(KdlyBlockBehaviors::defaultShape),
+			Codec.unboundedMap(BlockFunctionPoint.CODEC, Identifier.CODEC).optionalFieldOf("functions", Map.of()).forGetter(KdlyBlockBehaviors::functions)
+		).apply(instance, KdlyBlockBehaviors::new));
 
 		public VoxelShape getShape() {
 			VoxelShape ret = VoxelShapes.empty();

@@ -6,13 +6,13 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import dev.kdl.KdlNode;
+import gay.lemmaeof.kdlycontent.api.BlockParser;
+import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.util.PassedSettingsOps;
 import gay.lemmaeof.kdlycontent.util.SettingsParsing;
-import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ContentType;
-import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTypes;
@@ -40,20 +40,16 @@ public class BlockContentType implements ContentType {
 		AbstractBlock.Settings settings = SettingsParsing.parseBlockSettings(id, settingsNode);
 		KdlNode generatorNode = nodes.get("type");
 		//TODO: a few toe-stubs to maybe fix with custom before putting this in fully
-		/*String typeName = generatorNode == null? "block" : KdlHelper.getArg(generatorNode, 0, "block");
+		String typeName = generatorNode == null? "block" : KdlHelper.getArg(generatorNode, 0, "block");
 		if (typeName.equals("custom")) typeName = "kdlycontent:custom";
+		BlockParser parser = KdlyRegistries.BLOCK_PARSERS.get(Identifier.of(typeName));
 		List<KdlNode> customConfig = generatorNode == null? Collections.emptyList() : generatorNode.children();
-		JsonObject codecValue = KdlHelper.parseJsonObject(customConfig);
+		JsonObject codecValue = parser.parseData(id, customConfig);
 		codecValue.addProperty("type", typeName);
 		codecValue.addProperty("properties", "<Injected properties placeholder");
 		DataResult<Pair<Block, JsonElement>> res = BlockTypes.CODEC.codec().decode(new PassedSettingsOps<>(settings, JsonOps.INSTANCE), codecValue);
 		if (res.isError()) throw new ParseException(id, "Decode error on codec block: " + res.error().get().message());
-		Block block = res.result().get().getFirst();*/
-		String typeName = generatorNode == null? "kdlycontent:standard" : KdlHelper.getArg(generatorNode, 0, "kdlycontent:standard");
-		if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
-		List<KdlNode> customConfig = generatorNode == null? Collections.emptyList() : generatorNode.children();
-		BlockGenerator gen = KdlyRegistries.BLOCK_GENERATORS.get(Identifier.of(typeName));
-		Block block = gen.generateBlock(id, settings, customConfig);
+		Block block = res.result().get().getFirst();
 		KDLY_BLOCKS.put(id, Registry.register(Registries.BLOCK, id, block));
 
 		//item settings time!

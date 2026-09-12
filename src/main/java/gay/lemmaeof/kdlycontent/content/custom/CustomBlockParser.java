@@ -1,12 +1,14 @@
 package gay.lemmaeof.kdlycontent.content.custom;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import dev.kdl.KdlNode;
+import gay.lemmaeof.kdlycontent.api.BlockParser;
 import gay.lemmaeof.kdlycontent.util.Cuboid;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
-import gay.lemmaeof.kdlycontent.api.BlockGenerator;
 import gay.lemmaeof.kdlycontent.api.ParseException;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -14,16 +16,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CustomBlockGenerator implements BlockGenerator {
+public class CustomBlockParser implements BlockParser {
 	@Override
-	public Block generateBlock(Identifier id, AbstractBlock.Settings settings, List<KdlNode> customConfig) throws ParseException {
-		CustomBlock.KdlyBlockProperties props = parseProperties(id, customConfig);
-
-		return CustomBlock.create(settings, props);
+	public JsonObject parseData(Identifier id, List<KdlNode> customConfig) throws ParseException {
+		CustomBlock.KdlyBlockBehaviors behaviors = parseBehaviors(id, customConfig);
+		DataResult<JsonElement> result = CustomBlock.KdlyBlockBehaviors.CODEC.encodeStart(JsonOps.INSTANCE, behaviors);
+		if (result.isError()) throw new ParseException(id, "Error encoding custom block behaviors: " + result.error().get().message());
+		JsonObject ret = new JsonObject();
+		ret.add("behaviors", result.result().get());
+		return ret;
 	}
 
 	//TODO: generify even more but this at least makes it much less painful to extend CustomBlock and such
-	protected CustomBlock.KdlyBlockProperties parseProperties(Identifier id, List<KdlNode> customConfig) {
+	protected CustomBlock.KdlyBlockBehaviors parseBehaviors(Identifier id, List<KdlNode> customConfig) {
 		boolean hasWaterlogged = false;
 		CustomBlock.RotationProperty rotationProp = CustomBlock.RotationProperty.NONE;
 		CustomBlock.PlacementRule placementRule = CustomBlock.PlacementRule.PLAYER;
@@ -51,7 +56,6 @@ public class CustomBlockGenerator implements BlockGenerator {
 		if (nodes.containsKey("shape")) {
 			List<KdlNode> shapeNodes = nodes.get("shape").children();
 			for (KdlNode shapeNode : shapeNodes) {
-				//TODO: enforce node name? not really anything you can do other than cuboids without Major hacks
 				defaultShape.add(new Cuboid(
 						KdlHelper.getProp(shapeNode, "minX", 0.0F),
 						KdlHelper.getProp(shapeNode, "minY", 0.0F),
@@ -76,7 +80,7 @@ public class CustomBlockGenerator implements BlockGenerator {
 			}
 		}
 
-		return new CustomBlock.KdlyBlockProperties(hasWaterlogged, rotationProp, placementRule, defaultShape, functions);
+		return new CustomBlock.KdlyBlockBehaviors(hasWaterlogged, rotationProp, placementRule, defaultShape, functions);
 	}
 
 }
