@@ -102,6 +102,7 @@ public class KdlyContent implements ModInitializer {
 	//TODO: template overrides and such
 	//TODO: oh god this method is a nightmare
 	protected void parseKdl(String namespace, KdlDocument kdl) {
+		//TODO: global-scope templates - don't currently work in `require` blocks
 		Map<ContentType, Map<Identifier, KdlNode>> templates = new HashMap<>();
 		for (KdlNode node : kdl.nodes()) {
 			Identifier id = Identifier.of(namespace, "anonymous");
