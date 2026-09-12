@@ -46,7 +46,7 @@ public class BlockContentType implements ContentType {
 		List<KdlNode> customConfig = generatorNode == null? Collections.emptyList() : generatorNode.children();
 		JsonObject codecValue = parser.parseData(id, customConfig);
 		codecValue.addProperty("type", typeName);
-		codecValue.addProperty("properties", "<Injected properties placeholder");
+		codecValue.addProperty("properties", "<Injected properties placeholder>");
 		DataResult<Pair<Block, JsonElement>> res = BlockTypes.CODEC.codec().decode(new PassedSettingsOps<>(settings, JsonOps.INSTANCE), codecValue);
 		if (res.isError()) throw new ParseException(id, "Decode error on codec block: " + res.error().get().message());
 		Block block = res.result().get().getFirst();
