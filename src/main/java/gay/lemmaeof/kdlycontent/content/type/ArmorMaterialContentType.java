@@ -21,9 +21,7 @@ import java.util.function.Supplier;
 
 public class ArmorMaterialContentType implements ContentType {
 	public static final Map<Identifier, ArmorMaterial> KDLY_ARMOR_MATERIALS = new HashMap<>();
-
-	private static final int[] BASE_DURABILITY = new int[]{11, 16, 15, 13};
-
+	
 	@Override
 	public void generateFrom(Identifier id, KdlNode parent) throws ParseException {
 		Map<String, KdlNode> nodes = KdlHelper.mapNodes(parent.children());
