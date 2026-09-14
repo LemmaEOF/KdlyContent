@@ -56,12 +56,12 @@ public class CustomBlockParser implements BlockParser {
 			List<KdlNode> shapeNodes = nodes.get("shape").children();
 			for (KdlNode shapeNode : shapeNodes) {
 				defaultShape.add(new Cuboid(
-						KdlHelper.getProp(shapeNode, "minX", 0.0F),
-						KdlHelper.getProp(shapeNode, "minY", 0.0F),
-						KdlHelper.getProp(shapeNode, "minZ", 0.0F),
-						KdlHelper.getProp(shapeNode, "maxX", 16.0F),
-						KdlHelper.getProp(shapeNode, "maxY", 16.0F),
-						KdlHelper.getProp(shapeNode, "maxZ", 16.0F)
+						KdlHelper.getProp(shapeNode, "min_x", 0.0F),
+						KdlHelper.getProp(shapeNode, "min_y", 0.0F),
+						KdlHelper.getProp(shapeNode, "min_z", 0.0F),
+						KdlHelper.getProp(shapeNode, "max_x", 16.0F),
+						KdlHelper.getProp(shapeNode, "max_y", 16.0F),
+						KdlHelper.getProp(shapeNode, "max_z", 16.0F)
 				));
 			}
 		}

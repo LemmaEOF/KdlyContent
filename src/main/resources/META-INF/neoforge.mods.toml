@@ -1,0 +1,51 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "BSD-3"
+issueTrackerURL = "https://github.com/lemmaeof/kdlycontent/issues"
+
+[[mods]]
+modId = "kdlycontent"
+version = "${version}"
+displayName = "Kdly Content"
+description = '''A packdev tool to define new blocks and items statically in KDL.'''
+authors = "LemmaEOF"
+displayURL = "https://github.com/lemmaeof/kdlycontent"
+logoFile = "assets/kdlycontent/icon.png"
+
+[properties]
+"connector:placeholder" = true
+
+[[dependencies.kdlycontent]]
+modId = "connector"
+type = "required"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.kdlycontent]]
+modId = "neoforge"
+type = "required"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.kdlycontent]]
+modId = "minecraft"
+type = "required"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.kdlycontent]]
+modId = "fabric_api"
+type = "required"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.kdlycontent]]
+modId = "staticdata"
+mandatory = true
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"

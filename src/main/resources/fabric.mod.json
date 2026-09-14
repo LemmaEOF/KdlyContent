@@ -4,7 +4,7 @@
   "id": "kdlycontent",
   "version": "${version}",
   "name": "Kdly Content",
-  "description": "A system for writing simple blocks and items in kdl",
+  "description": "A packdev tool to define new blocks and items statically in KDL.",
   "authors": ["LemmaEOF"],
   "contact": {
     "homepage": "https://lemmaeof.gay/",
