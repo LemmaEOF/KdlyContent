@@ -37,6 +37,7 @@ public class KdlyGenerators {
 			case "chest" -> ArmorItem.Type.CHESTPLATE;
 			case "legs" -> ArmorItem.Type.LEGGINGS;
 			case "feet" -> ArmorItem.Type.BOOTS;
+			case "body" -> ArmorItem.Type.BODY;
 			default -> throw new ParseException(id, "Equipment slot not found");
 		};
 		return new ArmorItem(armor, slot, settings);
