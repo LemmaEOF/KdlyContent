@@ -1,10 +1,20 @@
 package gay.lemmaeof.kdlycontent.init;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.content.type.*;
+import gay.lemmaeof.kdlycontent.hooks.DynamicRegistrationCallback;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.RegistryOps;
 import net.minecraft.util.Identifier;
 
 public class KdlyContentTypes {
@@ -19,5 +29,31 @@ public class KdlyContentTypes {
 		return Registry.register(KdlyRegistries.CONTENT_TYPES, Identifier.of(KdlyContent.MODID, name), type);
 	}
 
-	public static void init() {}
+	public static void init() {
+		for (RegistryLoader.Entry<?> entry : DynamicRegistries.getDynamicRegistries()) {
+			registerDynamicType(entry);
+		}
+	}
+
+	private static <T> void registerDynamicType(RegistryLoader.Entry<T> entry) {
+		Identifier id = entry.key().getValue();
+		DynamicContentType<T> type = new DynamicContentType<>(entry);
+		//redirect vanilla dynreg types to our namespace
+		//also replace `/` with `.` for identifier legality without quotes
+		Identifier sanitizedId;
+		if (id.getNamespace().equals("minecraft")) sanitizedId = Identifier.of(KdlyContent.MODID, id.getPath().replace('/', '.'));
+		else sanitizedId = Identifier.of(id.getNamespace(), id.getPath().replace('/', '.'));
+		Registry.register(KdlyRegistries.CONTENT_TYPES, sanitizedId, type);
+		DynamicRegistrationCallback.event((RegistryKey<Registry<T>>) entry.key()).register((registry, infoGetter, decoder) -> {
+			RegistryOps<JsonElement> ops = RegistryOps.of(JsonOps.INSTANCE, infoGetter);
+			for (Identifier entryId : type.entries.keySet()) {
+				DataResult<Pair<T, JsonElement>> result = decoder.decode(ops, type.entries.get(entryId));
+				if (result.isError()) {
+					KdlyContent.LOGGER.error("Error decoding dynamic entry {} in {}: {}", entryId, entry.key().getValue(), result.error().get().message());
+				} else {
+					Registry.register(registry, entryId, result.result().get().getFirst());
+				}
+			}
+		});
+	}
 }

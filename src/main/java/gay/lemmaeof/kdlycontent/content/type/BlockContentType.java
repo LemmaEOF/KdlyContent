@@ -64,7 +64,7 @@ public class BlockContentType implements ContentType {
 		}
 
 		//render layers!
-		KdlNode renderLayerNode = nodes.get("renderLayer");
+		KdlNode renderLayerNode = nodes.get("render_layer");
 		if (renderLayerNode != null) {
 			KDLY_RENDER_LAYERS.put(block, KdlHelper.getArg(renderLayerNode, 0, "solid"));
 		}

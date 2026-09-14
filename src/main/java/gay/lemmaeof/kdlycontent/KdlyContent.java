@@ -10,13 +10,13 @@ import gay.debuggy.staticdata.api.StaticData;
 import gay.debuggy.staticdata.api.StaticDataItem;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
+import gay.lemmaeof.kdlycontent.hooks.LateModInitializer;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import gay.lemmaeof.kdlycontent.content.custom.CustomBlock;
 import gay.lemmaeof.kdlycontent.content.type.ItemContentType;
 import gay.lemmaeof.kdlycontent.init.KdlyContentTypes;
 import gay.lemmaeof.kdlycontent.init.KdlyGenerators;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
-import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -37,7 +37,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class KdlyContent implements ModInitializer {
+public class KdlyContent implements LateModInitializer {
+	private static final Map<ContentType, Map<Identifier, KdlNode>> templates = new HashMap<>();
+
 	public static final String MODID = "kdlycontent";
 	public static final Logger LOGGER = LoggerFactory.getLogger("KdlyContent");
 
@@ -52,8 +54,9 @@ public class KdlyContent implements ModInitializer {
 	);
 
 	@Override
-	public void onInitialize() {
-		KdlyContentTypes.init();
+	public void onLateInitialize() {
+		//do all our paperwork - every other mod should have finished initializing now
+		KdlyContentTypes.init(); //*needs* to be late so it doesn't miss modded dynregs
 		KdlyGenerators.init();
 		ItemGroupEvents.MODIFY_ENTRIES_ALL.register((group, entries) -> {
 			for (Item item : ItemContentType.KDLY_ITEM_GROUPS.getOrDefault(group, new ArrayList<>())) {
@@ -62,10 +65,14 @@ public class KdlyContent implements ModInitializer {
 		});
 		Registry.register(Registries.BLOCK_TYPE, Identifier.of(MODID, "custom"), CustomBlock.CODEC);
 
-		FabricLoader.getInstance().getEntrypoints("kdlycontent:before", Runnable.class).forEach(Runnable::run);
-		List<StaticDataItem> data = StaticData.getExactData(Identifier.of("", "kdlycontent.kdl"));
+		//our paperwork is done - let's get loading!
+		List<StaticDataItem> data = new ArrayList<>();
+		//allow both a `kdlycontent.kdl` and a `kdlycontent` subfolder for more organization
+		data.addAll(StaticData.getExactData(Identifier.of("", "kdlycontent.kdl")));
+		data.addAll(StaticData.getDataInDirectory(Identifier.of("", "kdlycontent"), true));
 		for (StaticDataItem item : data) {
 			String namespace = item.getModId();
+			LOGGER.info("Loading from file {}", item.getResourceId());
 			KdlDocument kdl;
 			try {
 				try {
@@ -80,11 +87,14 @@ public class KdlyContent implements ModInitializer {
 						throw new RuntimeException("Could not parse KDL for file" + item.getResourceId(), e);
 					}
 				}
+				//call out to actually process the document now that it's been lexed!
 				parseKdl(namespace, kdl);
 			} catch (IOException | ParseException e) {
 				throw new RuntimeException("Could not load KDL for file " + item.getResourceId(), e);
 			}
 		}
+
+		//everything should be done, let's log what got registered!
 		StringBuilder builder = new StringBuilder("Registered ");
 		List<String> messages = new ArrayList<>();
 		KdlyRegistries.CONTENT_TYPES.forEach(type -> type.getApplyMessage().ifPresent(messages::add));
@@ -96,31 +106,39 @@ public class KdlyContent implements ModInitializer {
 			builder.append("and ").append(messages.get(messages.size() - 1));
 		}
 		LOGGER.info(builder.toString());
-		FabricLoader.getInstance().getEntrypoints("kdlycontent:after", Runnable.class).forEach(Runnable::run);
+		//juuuuust in case anyone wants to do anything with the stuff that got registered
+		FabricLoader.getInstance().getEntrypoints("kdlycontent:after_register", Runnable.class).forEach(Runnable::run);
 	}
 
 	//TODO: template overrides and such
 	//TODO: oh god this method is a nightmare
 	protected void parseKdl(String namespace, KdlDocument kdl) {
-		//TODO: global-scope templates - don't currently work in `require` blocks
-		Map<ContentType, Map<Identifier, KdlNode>> templates = new HashMap<>();
 		for (KdlNode node : kdl.nodes()) {
 			Identifier id = Identifier.of(namespace, "anonymous");
 			String typeName = node.name();
+			//we add all default stuff under our namespace instead of vanilla's, so use that as default!
 			if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
 			Identifier typeId = Identifier.of(typeName);
 			if (KdlyRegistries.CONTENT_TYPES.containsId(typeId)) {
 				ContentType type = KdlyRegistries.CONTENT_TYPES.get(typeId);
+				//define a template!
 				if (node.type() != null && node.type().equals("template")) {
-					id = Identifier.of(KdlHelper.getArg(node, 0, "anonymous"));
+					id = Identifier.of(namespace, KdlHelper.getArg(node, 0, "anonymous"));
 					templates.computeIfAbsent(type, t -> new HashMap<>()).put(id, node);
 				} else {
 					if (type.needsIdentifier()) {
 						String name = KdlHelper.getArg(node, 0, "anonymous");
 						id = Identifier.of(namespace, name);
 					}
+					//use a template!
 					if (node.properties().hasProperty("template")) {
-						Identifier templateId = Identifier.of(KdlHelper.getProp(node, "template", ""));
+						String templateString = KdlHelper.getProp(node, "template", "");
+						Identifier templateId;
+						if (templateString.contains(":")) {
+							templateId = Identifier.of(templateString);
+						} else {
+							templateId = Identifier.of(namespace, templateString);
+						}
 						if (templates.containsKey(type)) {
 							Map<Identifier, KdlNode> typeTemplates = templates.get(type);
 							if (typeTemplates.containsKey(templateId)) {
@@ -133,7 +151,7 @@ public class KdlyContent implements ModInitializer {
 							throw new ParseException(id, "No templates for content type `" + node.name() + "` found (converted to `" + typeId + "`)");
 						}
 					} else {
-						//TODO: multiple IDs for quick-instantiation
+						//TODO: multiple IDs for quick-instantiation? semi-redundant with templates
 						type.generateFrom(id, node);
 					}
 				}

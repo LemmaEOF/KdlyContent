@@ -4,9 +4,12 @@
   "package": "gay.lemmaeof.kdlycontent.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "MixinAbstractBlock"
+    "MixinAbstractBlock",
+    "MixinMain",
+    "MixinRegistryLoader"
   ],
   "client": [
+    "client.MixinMinecraftClient"
   ],
   "injectors": {
     "defaultRequire": 1

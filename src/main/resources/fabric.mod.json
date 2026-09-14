@@ -4,7 +4,7 @@
   "id": "kdlycontent",
   "version": "${version}",
   "name": "Kdly Content",
-  "description": "A packdev tool to define new blocks and items statically in KDL.",
+  "description": "A tool to define new blocks, items, and more statically in kdl.",
   "authors": ["LemmaEOF"],
   "contact": {
     "homepage": "https://lemmaeof.gay/",
@@ -13,8 +13,8 @@
   },
   "icon": "assets/kdlycontent/icon.png",
   "entrypoints": {
-    "main": ["gay.lemmaeof.kdlycontent.KdlyContent"],
-    "client": ["gay.lemmaeof.kdlycontent.client.KdlyContentClient"]
+    "kdlycontent:late_main": ["gay.lemmaeof.kdlycontent.KdlyContent"],
+    "kdlycontent:late_client": ["gay.lemmaeof.kdlycontent.client.KdlyContentClient"]
   },
   "mixins": [
     "kdlycontent.mixins.json"
