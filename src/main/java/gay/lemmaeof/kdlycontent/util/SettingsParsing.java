@@ -10,10 +10,15 @@ import gay.lemmaeof.kdlycontent.api.ParseException;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.jukebox.JukeboxSong;
 import net.minecraft.component.ComponentType;
+import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.*;
 
 public class SettingsParsing {
@@ -113,6 +118,29 @@ public class SettingsParsing {
 						default -> throw new ParseException(id, "Unknown equipment slot " + slot);
 					});
 				}
+				//TODO: I think components might want a RegistryOps actually? How do I get one of those here?
+				case "food" -> {
+					JsonObject json = KdlHelper.parseJsonObject(node.children());
+					DataResult<Pair<FoodComponent, JsonElement>> result = FoodComponent.CODEC.decode(JsonOps.INSTANCE, json);
+					if (result.isError()) {
+						throw new ParseException(id, "Decode error on item food component: " + result.error().get().message());
+					}
+					settings.food(result.result().get().getFirst());
+				}
+				case "jukebox_playable" -> {
+					RegistryKey<JukeboxSong> key = RegistryKey.of(RegistryKeys.JUKEBOX_SONG, Identifier.of(KdlHelper.getArg(node, 0, "")));
+					settings.jukeboxPlayable(key);
+				}
+				//TODO: I think components might want a RegistryOps actually? How do I get one of those here?
+				case "attribute_modifiers" -> {
+					JsonObject json = KdlHelper.parseJsonObject(node.children());
+					DataResult<Pair<AttributeModifiersComponent, JsonElement>> result = AttributeModifiersComponent.CODEC.decode(JsonOps.INSTANCE, json);
+					if (result.isError()) {
+						throw new ParseException(id, "Decode error on item attribute modifiers component: " + result.error().get().message());
+					}
+					settings.attributeModifiers(result.result().get().getFirst());
+				}
+				//TODO: I think components might want a RegistryOps actually? How do I get one of those here?
 				case "component" -> {
 					Identifier compId = Identifier.of(KdlHelper.getArg(node, 0, ""));
 					ComponentType<?> type = Registries.DATA_COMPONENT_TYPE.get(compId);
