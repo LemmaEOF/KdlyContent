@@ -16,6 +16,7 @@ import gay.lemmaeof.kdlycontent.content.custom.CustomBlock;
 import gay.lemmaeof.kdlycontent.content.type.ItemContentType;
 import gay.lemmaeof.kdlycontent.init.KdlyContentTypes;
 import gay.lemmaeof.kdlycontent.init.KdlyGenerators;
+import gay.lemmaeof.kdlycontent.util.ContentTemplate;
 import gay.lemmaeof.kdlycontent.util.KdlHelper;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -38,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 public class KdlyContent implements LateModInitializer {
-	private static final Map<ContentType, Map<Identifier, KdlNode>> templates = new HashMap<>();
+	private static final Map<ContentType, Map<Identifier, ContentTemplate>> templates = new HashMap<>();
 
 	public static final String MODID = "kdlycontent";
 	public static final Logger LOGGER = LoggerFactory.getLogger("KdlyContent");
@@ -114,7 +115,7 @@ public class KdlyContent implements LateModInitializer {
 	//TODO: oh god this method is a nightmare
 	protected void parseKdl(String namespace, KdlDocument kdl) {
 		for (KdlNode node : kdl.nodes()) {
-			Identifier id = Identifier.of(namespace, "anonymous");
+			Identifier id = Identifier.of(namespace, KdlHelper.getArg(node, 0, "anonymous"));
 			String typeName = node.name();
 			//we add all default stuff under our namespace instead of vanilla's, so use that as default!
 			if (!typeName.contains(":")) typeName = "kdlycontent:" + typeName;
@@ -123,13 +124,8 @@ public class KdlyContent implements LateModInitializer {
 				ContentType type = KdlyRegistries.CONTENT_TYPES.get(typeId);
 				//define a template!
 				if (node.type() != null && node.type().equals("template")) {
-					id = Identifier.of(namespace, KdlHelper.getArg(node, 0, "anonymous"));
-					templates.computeIfAbsent(type, t -> new HashMap<>()).put(id, node);
+					templates.computeIfAbsent(type, t -> new HashMap<>()).put(id, new ContentTemplate(id, node));
 				} else {
-					if (type.needsIdentifier()) {
-						String name = KdlHelper.getArg(node, 0, "anonymous");
-						id = Identifier.of(namespace, name);
-					}
 					//use a template!
 					if (node.properties().hasProperty("template")) {
 						String templateString = KdlHelper.getProp(node, "template", "");
@@ -140,10 +136,10 @@ public class KdlyContent implements LateModInitializer {
 							templateId = Identifier.of(namespace, templateString);
 						}
 						if (templates.containsKey(type)) {
-							Map<Identifier, KdlNode> typeTemplates = templates.get(type);
+							Map<Identifier, ContentTemplate> typeTemplates = templates.get(type);
 							if (typeTemplates.containsKey(templateId)) {
-								KdlNode template = typeTemplates.get(templateId);
-								type.generateFrom(id, template);
+								ContentTemplate template = typeTemplates.get(templateId);
+								type.generateFrom(id, template.expandFor(id, node));
 							} else {
 								throw new ParseException(id, "No template named `" + templateId + "` for content type `" + node.name() + "` (converted to `" + typeId + "`)");
 							}
