@@ -1,7 +1,6 @@
 package gay.lemmaeof.kdlycontent.init;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -9,8 +8,11 @@ import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.api.ContentType;
 import gay.lemmaeof.kdlycontent.api.KdlyRegistries;
 import gay.lemmaeof.kdlycontent.content.type.*;
+import gay.lemmaeof.kdlycontent.hooks.DynamicRecipeCallback;
 import gay.lemmaeof.kdlycontent.hooks.DynamicRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryLoader;
@@ -23,6 +25,7 @@ public class KdlyContentTypes {
 	public static final ContentType ITEM = register("item", new ItemContentType());
 	public static final ContentType TOOL_MATERIAL = register("tool_material", new ToolMaterialContentType());
 	public static final ContentType ARMOR_MATERIAL = register("armor_material", new ArmorMaterialContentType());
+	public static final ContentType RECIPE = register("recipe", new RecipeContentType());
 	public static final ContentType REQUIRE = register("require", new ConditionalContentType());
 
 	private static ContentType register(String name, ContentType type) {
@@ -33,6 +36,16 @@ public class KdlyContentTypes {
 		for (RegistryLoader.Entry<?> entry : DynamicRegistries.getDynamicRegistries()) {
 			registerDynamicType(entry);
 		}
+		DynamicRecipeCallback.EVENT.register(((recipeConsumer, ops) -> {
+			for (Identifier id : RecipeContentType.KDLY_RECIPES.keySet()) {
+				DataResult<Pair<Recipe<?>, JsonElement>> result = Recipe.CODEC.decode(ops, RecipeContentType.KDLY_RECIPES.get(id));
+				if (result.isError()) {
+					KdlyContent.LOGGER.error("Error decoding recipe {}: {}", id, result.error().get().message());
+				} else {
+					recipeConsumer.accept(new RecipeEntry<>(id, result.result().get().getFirst()));
+				}
+			}
+		}));
 	}
 
 	private static <T> void registerDynamicType(RegistryLoader.Entry<T> entry) {

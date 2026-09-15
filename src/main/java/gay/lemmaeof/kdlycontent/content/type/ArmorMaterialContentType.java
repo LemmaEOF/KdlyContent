@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 public class ArmorMaterialContentType implements ContentType {
 	public static final Map<Identifier, ArmorMaterial> KDLY_ARMOR_MATERIALS = new HashMap<>();
-	
+
 	@Override
 	public void generateFrom(Identifier id, KdlNode parent) throws ParseException {
 		Map<String, KdlNode> nodes = KdlHelper.mapNodes(parent.children());

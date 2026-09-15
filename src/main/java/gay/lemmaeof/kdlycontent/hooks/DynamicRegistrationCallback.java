@@ -17,7 +17,7 @@ import java.util.Map;
 public interface DynamicRegistrationCallback<T> {
 	void onRegistration(MutableRegistry<T> registry, RegistryOps.RegistryInfoGetter infoGetter, Decoder<T> decoder);
 
-	static Map<RegistryKey<Registry>, Event<DynamicRegistrationCallback>> EVENTS = new HashMap<>();
+	Map<RegistryKey<Registry>, Event<DynamicRegistrationCallback>> EVENTS = new HashMap<>();
 
 	static <T> Event<DynamicRegistrationCallback<T>> event(RegistryKey<Registry<T>> registry) {
 		return EVENTS.computeIfAbsent((RegistryKey) registry, r -> EventFactory.createArrayBacked(

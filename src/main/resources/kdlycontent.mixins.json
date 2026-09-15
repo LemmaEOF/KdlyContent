@@ -6,6 +6,7 @@
   "mixins": [
     "MixinAbstractBlock",
     "MixinMain",
+    "MixinRecipeManager",
     "MixinRegistryLoader"
   ],
   "client": [
