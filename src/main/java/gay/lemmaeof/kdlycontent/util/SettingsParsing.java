@@ -28,6 +28,14 @@ public class SettingsParsing {
 			if (copyBlock == Blocks.AIR && !copyId.contains(":") && !copyId.equals("air")) {
 				copyBlock = Registries.BLOCK.get(Identifier.of(id.getNamespace(), copyId));
 			}
+			settings = AbstractBlock.Settings.copyShallow(copyBlock);
+		} else if (parent.properties().hasProperty("copy_deep")) {
+			String copyId = KdlHelper.getProp(parent, "copy", "");
+			Block copyBlock = Registries.BLOCK.get(Identifier.of(copyId));
+			//if the block is missing and not like that on purpose, assume grabbing from same namespce
+			if (copyBlock == Blocks.AIR && !copyId.contains(":") && !copyId.equals("air")) {
+				copyBlock = Registries.BLOCK.get(Identifier.of(id.getNamespace(), copyId));
+			}
 			settings = AbstractBlock.Settings.copy(copyBlock);
 		} else {
 			settings = AbstractBlock.Settings.create();

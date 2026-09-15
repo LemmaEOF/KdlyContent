@@ -26,6 +26,7 @@ public class KdlyContentTypes {
 	public static final ContentType TOOL_MATERIAL = register("tool_material", new ToolMaterialContentType());
 	public static final ContentType ARMOR_MATERIAL = register("armor_material", new ArmorMaterialContentType());
 	public static final ContentType RECIPE = register("recipe", new RecipeContentType());
+	public static final ContentType GROUP = register("group", new GroupContentType());
 	public static final ContentType REQUIRE = register("require", new ConditionalContentType());
 
 	private static ContentType register(String name, ContentType type) {
