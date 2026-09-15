@@ -2,13 +2,17 @@ package gay.lemmaeof.kdlycontent.util;
 
 import dev.kdl.KdlNode;
 import dev.kdl.KdlValue;
+import gay.lemmaeof.kdlycontent.KdlyContent;
 import gay.lemmaeof.kdlycontent.api.ParseException;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public record ContentTemplate(Identifier id, KdlNode template) {
+	private static final Pattern PATTERN = Pattern.compile("\\$\\{[^\\}]+\\}");
 
 	public KdlNode expandFor(Identifier otherId, KdlNode other) throws ParseException {
 		Map<String, KdlValue<?>> valueParams = new HashMap<>();
@@ -17,6 +21,7 @@ public record ContentTemplate(Identifier id, KdlNode template) {
 			if (key.equals("template")) continue;
 			valueParams.put(key, other.getProperty(key).get());
 		}
+		valueParams.put("_namespace", KdlValue.from(otherId.getNamespace()));
 		return expandNode(otherId, template, valueParams, nodeParams);
 	}
 
@@ -32,8 +37,9 @@ public record ContentTemplate(Identifier id, KdlNode template) {
 				} else {
 					return nodeParams.get(argName).mutate().name(node.name()).build();
 				}
-			} else {
-				throw new ParseException(otherId, "unknown type tag" + node.type() + " on node " + node.name());
+			//make sure it doesn't stub its toe on the outer template tag
+			} else if (!node.type().equals("template")) {
+				throw new ParseException(otherId, "unknown type tag " + node.type() + " on node " + node.name());
 			}
 		}
 		//kinda expensive recursive deep copy with param filling
@@ -42,12 +48,12 @@ public record ContentTemplate(Identifier id, KdlNode template) {
 		for (KdlValue<?> arg : node.arguments()) {
 			if (arg.type() != null) {
 				if (arg.type().equals("parameter")) {
-					String argName = String.valueOf(arg.value());
-					if (!valueParams.containsKey(argName)) {
-						throw new ParseException(otherId, "missing value parameter " + argName + " for template " + id);
+					String paramName = String.valueOf(arg.value());
+					if (!valueParams.containsKey(paramName)) {
+						throw new ParseException(otherId, "missing value parameter " + paramName + " for template " + id);
 					} else {
-						KdlValue<?> argValue = valueParams.get(argName);
-						builder.argument(argValue);
+						KdlValue<?> paramValue = valueParams.get(paramName);
+						builder.argument(paramValue);
 					}
 				} else if (arg.type().equals("interpolate")) {
 					String valText = String.valueOf(arg.value());
@@ -64,12 +70,12 @@ public record ContentTemplate(Identifier id, KdlNode template) {
 			KdlValue<?> prop = node.getProperty(key).get();
 			if (prop.type() != null) {
 				if (prop.type().equals("parameter")) {
-					String argName = String.valueOf(prop.value());
-					if (!valueParams.containsKey(argName)) {
-						throw new ParseException(otherId, "missing value parameter " + argName + " for template " + id);
+					String paramName = String.valueOf(prop.value());
+					if (!valueParams.containsKey(paramName)) {
+						throw new ParseException(otherId, "missing value parameter " + paramName + " for template " + id);
 					} else {
-						KdlValue<?> argValue = valueParams.get(argName);
-						builder.property(key, argValue);
+						KdlValue<?> paramValue = valueParams.get(paramName);
+						builder.property(key, paramValue);
 					}
 				} else if (prop.type().equals("interpolate")) {
 					String valText = String.valueOf(prop.value());
@@ -91,6 +97,14 @@ public record ContentTemplate(Identifier id, KdlNode template) {
 	}
 
 	private String interpolate(Identifier otherId, String toFill, Map<String, KdlValue<?>> valueParams) throws ParseException {
-		throw new ParseException(otherId, "interpolation NYI (shout at Lemma to get this fixed ASAP)");
+		Matcher matcher = PATTERN.matcher(toFill);
+		String matched = matcher.replaceAll(result -> {
+			String group = result.group();
+			String param = group.substring(2, group.length()-1);
+			if (!valueParams.containsKey(param)) throw new ParseException(otherId, "missing value parameter " + param + " for template " + id);
+			return String.valueOf(valueParams.get(param).value());
+		});
+		KdlyContent.LOGGER.debug("Interpolated {} to {}", toFill, matched);
+		return matched;
 	}
 }

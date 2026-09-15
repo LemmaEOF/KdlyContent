@@ -73,7 +73,7 @@ public class KdlyContent implements LateModInitializer {
 		data.addAll(StaticData.getDataInDirectory(Identifier.of("", "kdlycontent"), true));
 		for (StaticDataItem item : data) {
 			String namespace = item.getModId();
-			LOGGER.info("Loading from file {}", item.getResourceId());
+			LOGGER.debug("Loading from file {}", item.getResourceId());
 			KdlDocument kdl;
 			try {
 				try {
@@ -111,7 +111,6 @@ public class KdlyContent implements LateModInitializer {
 		FabricLoader.getInstance().getEntrypoints("kdlycontent:after_register", Runnable.class).forEach(Runnable::run);
 	}
 
-	//TODO: template overrides and such
 	//TODO: oh god this method is a nightmare
 	protected void parseKdl(String namespace, KdlDocument kdl) {
 		for (KdlNode node : kdl.nodes()) {
@@ -147,7 +146,6 @@ public class KdlyContent implements LateModInitializer {
 							throw new ParseException(id, "No templates for content type `" + node.name() + "` found (converted to `" + typeId + "`)");
 						}
 					} else {
-						//TODO: multiple IDs for quick-instantiation? semi-redundant with templates
 						type.generateFrom(id, node);
 					}
 				}
